@@ -16,7 +16,7 @@ async def _create_motioneye_server(aiohttp_server: Any, handlers: List[Any]) -> 
 
 
 async def test_signature(aiohttp_server: Any) -> None:
-    """Test client login."""
+    """Test signature."""
 
     async def login_handler(request: web.Request) -> web.Response:
         assert "_signature" in request.query
@@ -27,9 +27,10 @@ async def test_signature(aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/login", login_handler)]
     )
 
-    client = MotionEyeClient(str(server.make_url("/")), "username", "password")
-    assert await client.async_client_login()
-    assert await client.async_client_close()
+    async with MotionEyeClient(
+        str(server.make_url("/")), "username", "password"
+    ) as client:
+        assert client
 
 
 async def test_login(aiohttp_server: Any) -> None:
@@ -42,6 +43,7 @@ async def test_login(aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/login", login_handler)]
     )
 
-    client = MotionEyeClient(str(server.make_url("/")), "username", "password")
-    assert await client.async_client_login()
-    assert await client.async_client_close()
+    async with MotionEyeClient(
+        str(server.make_url("/")), "username", "password"
+    ) as client:
+        assert client

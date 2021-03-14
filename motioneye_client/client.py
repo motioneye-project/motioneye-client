@@ -3,9 +3,11 @@
 import aiohttp  # type: ignore
 import hashlib
 import logging
-from typing import cast, Any, Dict, Optional
+from typing import cast, Any, Dict, Optional, Type
 from . import utils
 from urllib.parse import urlencode, urljoin
+from types import TracebackType
+
 
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
@@ -17,8 +19,8 @@ class MotionEyeClient:
     def __init__(
         self,
         base_url: str,
-        username: str,
-        password: Optional[str] = None,
+        username: str = "admin",
+        password: str = "",
     ):
         """Construct a new motionEye client."""
         self._base_url = base_url
@@ -29,6 +31,20 @@ class MotionEyeClient:
         # TODO: basic http auth
         self._password = password
 
+    async def __aenter__(self) -> Optional["MotionEyeClient"]:
+        """Enter context manager and connect the client."""
+        result = await self.async_client_login()
+        return self if result else None
+
+    async def __aexit__(
+        self,
+        exc_type: Optional[Type[BaseException]],
+        exc: Optional[BaseException],
+        traceback: Optional[TracebackType],
+    ) -> None:
+        """Leave context manager and close the client."""
+        await self.async_client_close()
+
     def _build_url(self, path: str, params: Optional[Dict[str, Any]] = None) -> str:
         """Build a motionEye URL."""
         params = params or {}
@@ -38,15 +54,14 @@ class MotionEyeClient:
             }
         )
         url = urljoin(self._base_url, path + "?" + urlencode(params))
-        if self._password is not None:
-            key = hashlib.sha1(self._password.encode("UTF-8")).hexdigest()
-            signature = utils.compute_signature(
-                "GET",
-                url,
-                None,
-                key,
-            )
-            url += f"&_signature={signature}"
+        key = hashlib.sha1(self._password.encode("UTF-8")).hexdigest()
+        signature = utils.compute_signature(
+            "GET",
+            url,
+            None,
+            key,
+        )
+        url += f"&_signature={signature}"
         return url
 
     async def _async_get_json(self, url: str) -> Optional[Dict[str, Any]]:
