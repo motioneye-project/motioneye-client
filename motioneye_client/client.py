@@ -13,6 +13,10 @@ from types import TracebackType
 _LOGGER = logging.getLogger(__name__)
 _LOGGER.setLevel(logging.DEBUG)
 
+# Attempts to vaguely follow the below such that when the server
+# supports a more fully-formed API, this client could be converted.
+# https://github.com/ccrisan/motioneye/wiki/API-(Draft)
+
 
 class MotionEyeClient:
     """MotionEye Client."""
@@ -28,7 +32,6 @@ class MotionEyeClient:
         self._session = aiohttp.ClientSession()
         self._username = username
 
-        # TODO: Test empty password
         # TODO: basic http auth
         self._password = password
 
@@ -82,13 +85,23 @@ class MotionEyeClient:
         response = await self._async_get_json(self._build_url("/login"))
         return response is not None and "error" not in response
 
-    async def async_get_manifest(self) -> Optional[Dict[str, Any]]:
-        """Get the motionEye manifest."""
-
-        return await self._async_get_json(self._build_url("/manifest.json"))
-
     async def async_client_close(self) -> bool:
         """Disconnect to the MotionEye server."""
 
         await self._session.close()
         return True
+
+    async def async_get_manifest(self) -> Optional[Dict[str, Any]]:
+        """Get the motionEye manifest."""
+
+        return await self._async_get_json(self._build_url("/manifest.json"))
+
+    async def async_get_server_config(self) -> Optional[Dict[str, Any]]:
+        """Get the motionEye server config ."""
+
+        return await self._async_get_json(self._build_url("/config/main/get"))
+
+    async def async_get_cameras(self) -> Optional[Dict[str, Any]]:
+        """Get the motionEye cameras."""
+
+        return await self._async_get_json(self._build_url("/config/list"))

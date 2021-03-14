@@ -84,7 +84,7 @@ async def test_client_login_failure(aiohttp_server: Any) -> None:
 
 
 async def test_get_manifest(aiohttp_server: Any) -> None:
-    """Test getting the MotionEye manifest."""
+    """Test getting the motionEye manifest."""
 
     manifest = {"key": "value"}
     manifest_handler = Mock(return_value=web.json_response(manifest))
@@ -96,4 +96,33 @@ async def test_get_manifest(aiohttp_server: Any) -> None:
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_get_manifest() == manifest
-        assert manifest_handler.called
+
+
+async def test_get_server_config(aiohttp_server: Any) -> None:
+    """Test getting the motionEye server config."""
+
+    server_config = {"key": "value"}
+    server_config_handler = Mock(return_value=web.json_response(server_config))
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/config/main/get", server_config_handler)]
+    )
+
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_server_config() == server_config
+
+
+async def test_get_cameras(aiohttp_server: Any) -> None:
+    """Test getting the motionEye cameras."""
+
+    cameras = {"key": "value"}
+    list_cameras_handler = Mock(return_value=web.json_response(cameras))
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/config/list", list_cameras_handler)]
+    )
+
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_cameras() == cameras
