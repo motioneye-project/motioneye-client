@@ -3,7 +3,7 @@
 import logging
 from aiohttp import web  # type: ignore
 from typing import Any, List
-
+from unittest.mock import Mock
 from motioneye_client.client import MotionEyeClient
 
 _LOGGER = logging.getLogger(__name__)
@@ -12,6 +12,14 @@ _LOGGER = logging.getLogger(__name__)
 async def _create_motioneye_server(aiohttp_server: Any, handlers: List[Any]) -> Any:
     app = web.Application()
     app.add_routes(handlers)
+
+    # Add a login handler unless one is explicitly added (i.e. for testing logins).
+    for route in handlers:
+        if "/login" == route.path:
+            break
+    else:
+        login_handler = Mock(return_value=web.json_response({}))
+        app.add_routes([web.get("/login", login_handler)])
     return await aiohttp_server(app)
 
 
@@ -47,11 +55,10 @@ async def test_non_json_response(aiohttp_server: Any) -> None:
         assert not client
 
 
-async def test_login_success(aiohttp_server: Any) -> None:
+async def test_client_login_success(aiohttp_server: Any) -> None:
     """Test successful client login."""
 
-    async def login_handler(request: web.Request) -> web.Response:
-        return web.json_response({})
+    login_handler = Mock(return_value=web.json_response({}))
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/login", login_handler)]
@@ -61,11 +68,12 @@ async def test_login_success(aiohttp_server: Any) -> None:
         assert client
 
 
-async def test_login_failure(aiohttp_server: Any) -> None:
+async def test_client_login_failure(aiohttp_server: Any) -> None:
     """Test failed client login."""
 
-    async def login_handler(request: web.Request) -> web.Response:
-        return web.json_response({"prompt": True, "error": "unauthorized"})
+    login_handler = Mock(
+        return_value=web.json_response({"prompt": True, "error": "unauthorized"})
+    )
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/login", login_handler)]
@@ -73,3 +81,19 @@ async def test_login_failure(aiohttp_server: Any) -> None:
 
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert not client
+
+
+async def test_get_manifest(aiohttp_server: Any) -> None:
+    """Test getting the MotionEye manifest."""
+
+    manifest = {"key": "value"}
+    manifest_handler = Mock(return_value=web.json_response(manifest))
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/manifest.json", manifest_handler)]
+    )
+
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_manifest() == manifest
+        assert manifest_handler.called
