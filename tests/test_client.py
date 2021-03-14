@@ -33,17 +33,43 @@ async def test_signature(aiohttp_server: Any) -> None:
         assert client
 
 
-async def test_login(aiohttp_server: Any) -> None:
-    """Test client login."""
+async def test_non_json_response(aiohttp_server: Any) -> None:
+    """Test a non-JSON response."""
 
     async def login_handler(request: web.Request) -> web.Response:
-        return web.json_response({"moo": "foo"})
+        return web.Response(body="this is not json")
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/login", login_handler)]
     )
 
-    async with MotionEyeClient(
-        str(server.make_url("/")), "username", "password"
-    ) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert not client
+
+
+async def test_login_success(aiohttp_server: Any) -> None:
+    """Test successful client login."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        return web.json_response({})
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/login", login_handler)]
+    )
+
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
+
+
+async def test_login_failure(aiohttp_server: Any) -> None:
+    """Test failed client login."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        return web.json_response({"prompt": True, "error": "unauthorized"})
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/login", login_handler)]
+    )
+
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert not client

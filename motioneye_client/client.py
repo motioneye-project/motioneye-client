@@ -3,6 +3,7 @@
 import aiohttp  # type: ignore
 import hashlib
 import logging
+import json
 from typing import cast, Any, Dict, Optional, Type
 from . import utils
 from urllib.parse import urlencode, urljoin
@@ -66,18 +67,20 @@ class MotionEyeClient:
 
     async def _async_get_json(self, url: str) -> Optional[Dict[str, Any]]:
         """Fetch JSON from motionEye server."""
-        # TODO exceptions
         async with self._session.get(url) as response:
             _LOGGER.debug("GET %s -> %i", url, response.status)
-            return cast(
-                Optional[Dict[str, Any]], await response.json(content_type=None)
-            )
+            try:
+                return cast(
+                    Optional[Dict[str, Any]], await response.json(content_type=None)
+                )
+            except json.decoder.JSONDecodeError:
+                return None
 
     async def async_client_login(self) -> bool:
         """Login to the motionEye server."""
 
         response = await self._async_get_json(self._build_url("/login"))
-        return response is not None
+        return response is not None and "error" not in response
 
     async def async_get_manifest(self) -> Optional[Dict[str, Any]]:
         """Get the motionEye manifest."""
