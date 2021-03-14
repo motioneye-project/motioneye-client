@@ -1,0 +1,54 @@
+---
+repos:
+  - repo: https://github.com/asottile/pyupgrade
+    rev: v2.7.2
+    hooks:
+      - id: pyupgrade
+        args: [--py37-plus]
+  - repo: https://github.com/psf/black
+    rev: 20.8b1
+    hooks:
+      - id: black
+  - repo: https://github.com/codespell-project/codespell
+    rev: v1.17.1
+    hooks:
+      - id: codespell
+        args:
+          - --skip="./.*,*.csv,*.json"
+          - --quiet-level=2
+        exclude_types: [csv, json]
+  - repo: https://gitlab.com/pycqa/flake8
+    rev: 3.8.3
+    hooks:
+      - id: flake8
+        additional_dependencies:
+          - flake8-docstrings
+          - pydocstyle
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v3.2.0
+    hooks:
+      - id: check-executables-have-shebangs
+      - id: check-json
+  - repo: https://github.com/adrienverge/yamllint.git
+    rev: v1.24.2
+    hooks:
+      - id: yamllint
+  - repo: https://github.com/pre-commit/mirrors-mypy
+    rev: 'v0.782'
+    hooks:
+      - id: mypy
+        args:
+          - --warn-unused-configs
+          - --disallow-any-generics
+          - --disallow-subclassing-any
+          - --disallow-untyped-calls
+          - --disallow-untyped-defs
+          - --disallow-incomplete-defs
+          - --check-untyped-defs
+          - --disallow-untyped-decorators
+          - --no-implicit-optional
+          - --warn-redundant-casts
+          - --warn-unused-ignores
+          - --warn-return-any
+          - --no-implicit-reexport
+          - --warn-unreachable
