@@ -83,10 +83,8 @@ class MotionEyeClient:
 
         if method == "GET":
             func = self._session.get
-        elif method == "POST":
-            func = self._session.post
         else:
-            raise NotImplementedError
+            func = self._session.post
 
         coro = func(url, data=serialized_json, headers=headers)
 

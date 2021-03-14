@@ -50,10 +50,10 @@ def compute_signature(method: str, path: str, body: Optional[str], key: str) -> 
     path = _SIGNATURE_REGEX.sub("-", path)
     key = _SIGNATURE_REGEX.sub("-", key)
 
-    if body and body.startswith("---"):
-        body = None  # file attachment
-
+    # File attachment.
+    body = None if body and body.startswith("---") else body
     body = body and _SIGNATURE_REGEX.sub("-", body)
+
     return (
         hashlib.sha1(
             (
