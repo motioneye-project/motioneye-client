@@ -16,7 +16,9 @@ keywords = [
     "motioneye",
 ]
 repository = "https://github.com/dermotduffy/motioneye-client"
-include = ["motioneye_client/py.typed"]
+include = ["motioneye_client/py.typed", "LICENSE"]
+readme = "README.md"
+license = "MIT"
 
 [tool.poetry.dependencies]
 python = "^3.7 | ^3.8 | ^3.9"
