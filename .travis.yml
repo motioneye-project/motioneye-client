@@ -3,9 +3,11 @@ python:
   - "3.7"
   - "3.8"
   - "3.9-dev"
-cache: pip
-install: pip install -r requirements_test.txt
+before_install:
+  - pip install poetry
+install:
+  - poetry install
 script:
-  - pytest --cov-report term --cov=motioneye_client
+  - poetry run pytest --cov-report term --cov=motioneye_client
 after_success:
   - codecov --env TRAVIS_OS_NAME
