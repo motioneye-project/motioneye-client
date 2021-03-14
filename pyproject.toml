@@ -1,0 +1,29 @@
+[tool.poetry]
+name = "motioneye-client"
+version = "0.1.0"
+description = "motionEye client library Python Package"
+authors = ["Dermot Duffy <dermot.duffy@gmail.com>"]
+classifiers = [
+    "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3.7",
+    "Programming Language :: Python :: 3.8",
+    "Programming Language :: Python :: 3.9",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+    "Topic :: Home Automation",
+]
+keywords = [
+    "motioneye",
+]
+repository = "https://github.com/dermotduffy/motioneye-client"
+include = ["motioneye_client/py.typed"]
+
+[tool.poetry.dependencies]
+python = "^3.7 | ^3.8 | ^3.9"
+
+[tool.poetry.dev-dependencies]
+pytest = "^5.2"
+
+[build-system]
+requires = ["poetry-core>=1.0.0"]
+build-backend = "poetry.core.masonry.api"

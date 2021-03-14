@@ -73,3 +73,6 @@ ctags.tmp
 
 # Built docs
 docs/build
+
+# Poetry.
+poetry.lock

@@ -8,6 +8,7 @@ from . import utils
 from urllib.parse import urlencode, urljoin
 
 _LOGGER = logging.getLogger(__name__)
+_LOGGER.setLevel(logging.DEBUG)
 
 
 class MotionEyeClient:
