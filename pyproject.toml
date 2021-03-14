@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "motioneye-client"
-version = "0.1.0"
+version = "0.1.1"
 description = "motionEye client library Python Package"
 authors = ["Dermot Duffy <dermot.duffy@gmail.com>"]
 classifiers = [
