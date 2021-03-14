@@ -4,7 +4,7 @@ import aiohttp  # type: ignore
 import hashlib
 import logging
 import json
-from typing import cast, Any, Dict, Optional, Type
+from typing import cast, Any, Dict, Optional, Tuple, Type
 from . import utils
 from urllib.parse import urlencode, urljoin
 from types import TracebackType
@@ -49,7 +49,13 @@ class MotionEyeClient:
         """Leave context manager and close the client."""
         await self.async_client_close()
 
-    def _build_url(self, path: str, params: Optional[Dict[str, Any]] = None) -> str:
+    def _build_url(
+        self,
+        path: str,
+        params: Optional[Dict[str, Any]] = None,
+        data: Optional[str] = None,
+        method: str = "GET",
+    ) -> str:
         """Build a motionEye URL."""
         params = params or {}
         params.update(
@@ -59,31 +65,60 @@ class MotionEyeClient:
         )
         url = urljoin(self._base_url, path + "?" + urlencode(params))
         key = hashlib.sha1(self._password.encode("UTF-8")).hexdigest()
-        signature = utils.compute_signature(
-            "GET",
-            url,
-            None,
-            key,
-        )
+        signature = utils.compute_signature(method, url, data, key)
         url += f"&_signature={signature}"
         return url
 
-    async def _async_get_json(self, url: str) -> Optional[Dict[str, Any]]:
-        """Fetch JSON from motionEye server."""
-        async with self._session.get(url) as response:
-            _LOGGER.debug("GET %s -> %i", url, response.status)
+    async def _async_request(
+        self, path: str, data: Optional[Dict[str, Any]] = None, method: str = "GET"
+    ) -> Tuple[int, Optional[Dict[str, Any]]]:
+        """Fetch return code and JSON from motionEye server."""
+
+        serialized_json = json.dumps(data) if data else None
+        url = self._build_url(path, data=serialized_json, method=method)
+
+        headers = {}
+        if serialized_json:
+            headers = {"Content-Type": "application/json"}
+
+        if method == "GET":
+            func = self._session.get
+        elif method == "POST":
+            func = self._session.post
+        else:
+            raise NotImplementedError
+
+        coro = func(url, data=serialized_json, headers=headers)
+
+        async with coro as response:
+            _LOGGER.debug("%s %s -> %i", method, url, response.status)
+            if response.status != 200:
+                _LOGGER.warning(
+                    f"Unexpected return code {response.status} for request: {url}"
+                )
             try:
-                return cast(
-                    Optional[Dict[str, Any]], await response.json(content_type=None)
+                return (
+                    response.status,
+                    cast(
+                        Optional[Dict[str, Any]], await response.json(content_type=None)
+                    ),
                 )
             except json.decoder.JSONDecodeError:
-                return None
+                _LOGGER.debug(f"Could not JSON decode: {await response.text()}")
+                return (response.status, None)
 
     async def async_client_login(self) -> bool:
         """Login to the motionEye server."""
 
-        response = await self._async_get_json(self._build_url("/login"))
-        return response is not None and "error" not in response
+        status, response = await self._async_request("/login")
+        success = status == 200 and response is not None and "error" not in response
+        if not success:
+            _LOGGER.warning(
+                f"Login failed to {self._base_url}" + ": " + str(response)
+                if response
+                else ""
+            )
+        return success
 
     async def async_client_close(self) -> bool:
         """Disconnect to the MotionEye server."""
@@ -93,15 +128,29 @@ class MotionEyeClient:
 
     async def async_get_manifest(self) -> Optional[Dict[str, Any]]:
         """Get the motionEye manifest."""
-
-        return await self._async_get_json(self._build_url("/manifest.json"))
+        _, response = await self._async_request("/manifest.json")
+        return response
 
     async def async_get_server_config(self) -> Optional[Dict[str, Any]]:
         """Get the motionEye server config ."""
-
-        return await self._async_get_json(self._build_url("/config/main/get"))
+        _, response = await self._async_request("/config/main/get")
+        return response
 
     async def async_get_cameras(self) -> Optional[Dict[str, Any]]:
-        """Get the motionEye cameras."""
+        """Get all motionEye cameras config."""
+        _, response = await self._async_request("/config/list")
+        return response
 
-        return await self._async_get_json(self._build_url("/config/list"))
+    async def async_get_camera(self, camera_id: int) -> Optional[Dict[str, Any]]:
+        """Get a motionEye camera config."""
+        _, response = await self._async_request(f"/config/{camera_id}/get")
+        return response
+
+    async def async_set_camera(self, camera_id: int, config: Dict[str, Any]) -> bool:
+        """Set a motionEye camera config."""
+        status, _ = await self._async_request(
+            f"/config/{camera_id}/set",
+            method="POST",
+            data=config,
+        )
+        return status == 200
