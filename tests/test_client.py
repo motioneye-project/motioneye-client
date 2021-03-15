@@ -104,7 +104,9 @@ async def test_client_login_failure(caplog: Any, aiohttp_server: Any) -> None:
     """Test failed client login."""
 
     login_handler = Mock(
-        return_value=web.json_response({"prompt": True, "error": "unauthorized"})
+        return_value=web.json_response(
+            {"prompt": True, "error": "unauthorized"}, status=403
+        )
     )
 
     server = await _create_motioneye_server(
@@ -113,7 +115,7 @@ async def test_client_login_failure(caplog: Any, aiohttp_server: Any) -> None:
 
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert not client
-    assert "Login failed" in caplog.text
+    assert "Authentication failed" in caplog.text
 
 
 async def test_get_manifest(aiohttp_server: Any) -> None:
@@ -191,4 +193,4 @@ async def test_set_camera(aiohttp_server: Any) -> None:
 
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
-        assert await client.async_set_camera(100, config=camera)
+        assert await client.async_set_camera(100, config=camera) == {}

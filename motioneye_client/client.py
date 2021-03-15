@@ -4,7 +4,7 @@ import aiohttp  # type: ignore
 import hashlib
 import logging
 import json
-from typing import cast, Any, Dict, Optional, Tuple, Type
+from typing import cast, Any, Dict, Optional, Type
 from . import utils
 from urllib.parse import urlencode, urljoin
 from types import TracebackType
@@ -16,6 +16,22 @@ _LOGGER.setLevel(logging.DEBUG)
 # Attempts to vaguely follow the below such that when the server
 # supports a more fully-formed API, this client could be converted.
 # https://github.com/ccrisan/motioneye/wiki/API-(Draft)
+
+
+class MotionEyeClientError(Exception):
+    """General MotionEyeClient error."""
+
+
+class MotionEyeClientInvalidAuth(MotionEyeClientError):
+    """Invalid motionEye authentication."""
+
+
+class MotionEyeClientConnectionFailure(MotionEyeClientError):
+    """Connection failure."""
+
+
+class MotionEyeClientRequestFailed(MotionEyeClientError):
+    """Request failure."""
 
 
 class MotionEyeClient:
@@ -37,8 +53,11 @@ class MotionEyeClient:
 
     async def __aenter__(self) -> Optional["MotionEyeClient"]:
         """Enter context manager and connect the client."""
-        result = await self.async_client_login()
-        return self if result else None
+        try:
+            await self.async_client_login()
+        except MotionEyeClientError:
+            return None
+        return self
 
     async def __aexit__(
         self,
@@ -71,7 +90,7 @@ class MotionEyeClient:
 
     async def _async_request(
         self, path: str, data: Optional[Dict[str, Any]] = None, method: str = "GET"
-    ) -> Tuple[int, Optional[Dict[str, Any]]]:
+    ) -> Optional[Dict[str, Any]]:
         """Fetch return code and JSON from motionEye server."""
 
         serialized_json = json.dumps(data) if data else None
@@ -91,37 +110,32 @@ class MotionEyeClient:
         try:
             async with coro as response:
                 _LOGGER.debug("%s %s -> %i", method, url, response.status)
-                if response.status != 200:
+                if response.status == 403:
+                    _LOGGER.warning(
+                        f"Authentication failed in request to {self._base_url}: {response}"
+                    )
+                    raise MotionEyeClientInvalidAuth(response)
+                elif not response.ok:
                     _LOGGER.warning(
                         f"Unexpected return code {response.status} for request: {url}"
                     )
+                    raise MotionEyeClientRequestFailed(response)
                 try:
-                    return (
-                        response.status,
-                        cast(
-                            Optional[Dict[str, Any]],
-                            await response.json(content_type=None),
-                        ),
+                    return cast(
+                        Optional[Dict[str, Any]],
+                        await response.json(content_type=None),
                     )
                 except json.decoder.JSONDecodeError:
                     _LOGGER.debug(f"Could not JSON decode: {await response.text()}")
-                    return (response.status, None)
+                    raise MotionEyeClientRequestFailed(response)
         except aiohttp.client_exceptions.ClientConnectorError as exc:
             _LOGGER.warning(f"Connection failed to motionEye: {exc}")
-            return (502, None)
+            raise MotionEyeClientConnectionFailure(exc)
 
-    async def async_client_login(self) -> bool:
+    async def async_client_login(self) -> Optional[Dict[str, Any]]:
         """Login to the motionEye server."""
 
-        status, response = await self._async_request("/login")
-        success = status == 200 and response is not None and "error" not in response
-        if not success:
-            _LOGGER.warning(
-                f"Login failed to {self._base_url}" + ": " + str(response)
-                if response
-                else ""
-            )
-        return success
+        return await self._async_request("/login")
 
     async def async_client_close(self) -> bool:
         """Disconnect to the MotionEye server."""
@@ -131,29 +145,26 @@ class MotionEyeClient:
 
     async def async_get_manifest(self) -> Optional[Dict[str, Any]]:
         """Get the motionEye manifest."""
-        _, response = await self._async_request("/manifest.json")
-        return response
+        return await self._async_request("/manifest.json")
 
     async def async_get_server_config(self) -> Optional[Dict[str, Any]]:
         """Get the motionEye server config ."""
-        _, response = await self._async_request("/config/main/get")
-        return response
+        return await self._async_request("/config/main/get")
 
     async def async_get_cameras(self) -> Optional[Dict[str, Any]]:
         """Get all motionEye cameras config."""
-        _, response = await self._async_request("/config/list")
-        return response
+        return await self._async_request("/config/list")
 
     async def async_get_camera(self, camera_id: int) -> Optional[Dict[str, Any]]:
         """Get a motionEye camera config."""
-        _, response = await self._async_request(f"/config/{camera_id}/get")
-        return response
+        return await self._async_request(f"/config/{camera_id}/get")
 
-    async def async_set_camera(self, camera_id: int, config: Dict[str, Any]) -> bool:
+    async def async_set_camera(
+        self, camera_id: int, config: Dict[str, Any]
+    ) -> Optional[Dict[str, Any]]:
         """Set a motionEye camera config."""
-        status, _ = await self._async_request(
+        return await self._async_request(
             f"/config/{camera_id}/set",
             method="POST",
             data=config,
         )
-        return status == 200
