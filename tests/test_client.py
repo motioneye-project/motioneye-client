@@ -1,6 +1,7 @@
 """Test the motionEye client."""
-
+from contextlib import closing
 import logging
+import socket
 from aiohttp import web  # type: ignore
 from typing import Any, List
 from unittest.mock import Mock
@@ -68,6 +69,22 @@ async def test_non_200_response(aiohttp_server: Any) -> None:
 
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert not client
+
+
+async def test_cannot_connect(caplog: Any, aiohttp_server: Any) -> None:
+    """Test a failed connection."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        return web.Response(body="this is not json")
+
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(("localhost", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        port = s.getsockname()[1]
+
+        async with MotionEyeClient(f"http://localhost:{port}") as client:
+            assert not client
+    assert "Connection failed" in caplog.text
 
 
 async def test_client_login_success(aiohttp_server: Any) -> None:

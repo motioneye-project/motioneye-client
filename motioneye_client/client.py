@@ -88,22 +88,27 @@ class MotionEyeClient:
 
         coro = func(url, data=serialized_json, headers=headers)
 
-        async with coro as response:
-            _LOGGER.debug("%s %s -> %i", method, url, response.status)
-            if response.status != 200:
-                _LOGGER.warning(
-                    f"Unexpected return code {response.status} for request: {url}"
-                )
-            try:
-                return (
-                    response.status,
-                    cast(
-                        Optional[Dict[str, Any]], await response.json(content_type=None)
-                    ),
-                )
-            except json.decoder.JSONDecodeError:
-                _LOGGER.debug(f"Could not JSON decode: {await response.text()}")
-                return (response.status, None)
+        try:
+            async with coro as response:
+                _LOGGER.debug("%s %s -> %i", method, url, response.status)
+                if response.status != 200:
+                    _LOGGER.warning(
+                        f"Unexpected return code {response.status} for request: {url}"
+                    )
+                try:
+                    return (
+                        response.status,
+                        cast(
+                            Optional[Dict[str, Any]],
+                            await response.json(content_type=None),
+                        ),
+                    )
+                except json.decoder.JSONDecodeError:
+                    _LOGGER.debug(f"Could not JSON decode: {await response.text()}")
+                    return (response.status, None)
+        except aiohttp.client_exceptions.ClientConnectorError as exc:
+            _LOGGER.warning(f"Connection failed to motionEye: {exc}")
+            return (502, None)
 
     async def async_client_login(self) -> bool:
         """Login to the motionEye server."""
