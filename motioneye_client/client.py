@@ -6,7 +6,13 @@ import logging
 import json
 from typing import cast, Any, Dict, Optional, Type
 from . import utils
-from .const import KEY_STREAMING_PORT, KEY_VIDEO_STREAMING, KEY_ID
+from .const import (
+    DEFAULT_ADMIN_USERNAME,
+    DEFAULT_SURVEILLANCE_USERNAME,
+    KEY_STREAMING_PORT,
+    KEY_VIDEO_STREAMING,
+    KEY_ID,
+)
 from urllib.parse import urlencode, urljoin
 from types import TracebackType
 
@@ -42,9 +48,9 @@ class MotionEyeClient:
         self,
         host: str,
         port: int,
-        admin_username: str = "admin",
+        admin_username: str = DEFAULT_ADMIN_USERNAME,
         admin_password: str = "",
-        surveillance_username: str = "user",
+        surveillance_username: str = DEFAULT_SURVEILLANCE_USERNAME,
         surveillance_password: str = "",
     ):
         """Construct a new motionEye client."""

@@ -1,6 +1,7 @@
 """Constants for motionEye client."""
 DEFAULT_PORT = 8765
-DEFAULT_USERNAME = "admin"
+DEFAULT_ADMIN_USERNAME = "admin"
+DEFAULT_SURVEILLANCE_USERNAME = "user"
 
 KEY_CAMERAS = "cameras"
 KEY_NAME = "name"
