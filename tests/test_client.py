@@ -30,7 +30,7 @@ async def test_signature(aiohttp_server: Any) -> None:
 
     async def login_handler(request: web.Request) -> web.Response:
         assert "_signature" in request.query
-        assert request.query["_signature"] == "2df0446590ac6038c4cec2b3d39639bf22575fed"
+        assert request.query["_signature"] == "010aec346f06cb5cf7f25dd5e3a33798d3032ae7"
         return web.json_response({})
 
     server = await _create_motioneye_server(
@@ -38,7 +38,12 @@ async def test_signature(aiohttp_server: Any) -> None:
     )
 
     async with MotionEyeClient(
-        server.host, server.port, "username", "password"
+        server.host,
+        server.port,
+        "admin",
+        "password",
+        "user",
+        "user_password",
     ) as client:
         assert client
 
@@ -232,7 +237,7 @@ async def test_get_camera_snapshot_url(aiohttp_server: Any) -> None:
         client.get_camera_snapshot_url(
             {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True, KEY_ID: 100}
         )
-        == "http://host:8000/picture/100/current/?_username=admin&_signature=1024caffab5621cbfd1b49439472f74319062f29"
+        == "http://host:8000/picture/100/current/?_username=user&_signature=5419538a3223b63a72d79982cd7604e17442b350"
     )
 
     assert not client.get_camera_snapshot_url(

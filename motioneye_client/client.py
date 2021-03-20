@@ -42,17 +42,21 @@ class MotionEyeClient:
         self,
         host: str,
         port: int,
-        username: str = "admin",
-        password: str = "",
+        admin_username: str = "admin",
+        admin_password: str = "",
+        surveillance_username: str = "user",
+        surveillance_password: str = "",
     ):
         """Construct a new motionEye client."""
         self._host = host
         self._port = port
         self._session = aiohttp.ClientSession()
-        self._username = username
+        self._admin_username = admin_username
+        self._admin_password = admin_password
+        self._surveillance_username = surveillance_username
+        self._surveillance_password = surveillance_password
 
         # TODO: basic http auth
-        self._password = password
 
     async def __aenter__(self) -> Optional["MotionEyeClient"]:
         """Enter context manager and connect the client."""
@@ -77,29 +81,42 @@ class MotionEyeClient:
         params: Optional[Dict[str, Any]] = None,
         data: Optional[str] = None,
         method: str = "GET",
+        admin: bool = True,
     ) -> str:
         """Build a motionEye URL."""
+        username = self._admin_username if admin else self._surveillance_username
+        password = self._admin_password if admin else self._surveillance_password
+
         params = params or {}
         params.update(
             {
-                "_username": self._username,
+                "_username": username,
             }
         )
         url = urljoin(
             f"http://{self._host}:{self._port}", path + "?" + urlencode(params)
         )
-        key = hashlib.sha1(self._password.encode("UTF-8")).hexdigest()
+        key = hashlib.sha1(password.encode("UTF-8")).hexdigest()
         signature = utils.compute_signature(method, url, data, key)
         url += f"&_signature={signature}"
         return url
 
     async def _async_request(
-        self, path: str, data: Optional[Dict[str, Any]] = None, method: str = "GET"
+        self,
+        path: str,
+        data: Optional[Dict[str, Any]] = None,
+        method: str = "GET",
+        admin: bool = True,
     ) -> Optional[Dict[str, Any]]:
         """Fetch return code and JSON from motionEye server."""
 
         serialized_json = json.dumps(data) if data else None
-        url = self._build_url(path, data=serialized_json, method=method)
+        url = self._build_url(
+            path,
+            data=serialized_json,
+            method=method,
+            admin=admin,
+        )
 
         headers = {}
         if serialized_json:
@@ -193,8 +210,11 @@ class MotionEyeClient:
         """Get the camera stream URL."""
         if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
             return None
-        snapshot_url = f"http://{self._host}:{self._port}/picture/{camera[KEY_ID]}/current/?_username={self._username}"
+        snapshot_url = f"http://{self._host}:{self._port}/picture/{camera[KEY_ID]}/current/?_username={self._surveillance_username}"
         snapshot_url += "&_signature=" + utils.compute_signature_from_password(
-            "GET", snapshot_url, None, self._password
+            "GET",
+            snapshot_url,
+            None,
+            self._surveillance_password,
         )
         return snapshot_url
