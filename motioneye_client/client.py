@@ -7,8 +7,8 @@ import json
 from typing import cast, Any, Dict, Optional, Type
 from . import utils
 from .const import (
-    DEFAULT_ADMIN_USERNAME,
-    DEFAULT_SURVEILLANCE_USERNAME,
+    DEFAULT_USERNAME_ADMIN,
+    DEFAULT_USERNAME_SURVEILLANCE,
     KEY_STREAMING_PORT,
     KEY_VIDEO_STREAMING,
     KEY_ID,
@@ -48,9 +48,9 @@ class MotionEyeClient:
         self,
         host: str,
         port: int,
-        admin_username: str = DEFAULT_ADMIN_USERNAME,
+        admin_username: str = DEFAULT_USERNAME_ADMIN,
         admin_password: str = "",
-        surveillance_username: str = DEFAULT_SURVEILLANCE_USERNAME,
+        surveillance_username: str = DEFAULT_USERNAME_SURVEILLANCE,
         surveillance_password: str = "",
     ):
         """Construct a new motionEye client."""
