@@ -28,14 +28,26 @@ from urllib.parse import (
 
 _SIGNATURE_REGEX = re.compile(r'[^a-zA-Z0-9/?_.=&{}\[\]":, -]')
 
+
+def compute_signature_from_password(
+    method: str,
+    path: str,
+    body: Optional[str],
+    password: Optional[str] = None,
+) -> str:
+    """Compute a request signature from a password."""
+    key = hashlib.sha1((password or "").encode("UTF-8")).hexdigest()
+    return compute_signature(method, path, body, key)
+
+
 # ================================================================
-# This is a slightly adjusted version of the compute_signature function
+# Below is a slightly adjusted version of the compute_signature function
 # found here: https://github.com/ccrisan/motioneye/blob/dev/motioneye/utils.py
 # ================================================================
 
 
 def compute_signature(method: str, path: str, body: Optional[str], key: str) -> str:
-    """Compute a request signature."""
+    """Compute a request signature from a key."""
     parts: List[str] = list(urlsplit(path))
     query: List[Tuple[str, str]] = [
         q for q in parse_qsl(parts[3], keep_blank_values=True) if (q[0] != "_signature")

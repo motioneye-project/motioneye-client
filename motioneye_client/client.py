@@ -6,6 +6,7 @@ import logging
 import json
 from typing import cast, Any, Dict, Optional, Type
 from . import utils
+from .const import KEY_STREAMING_PORT, KEY_VIDEO_STREAMING, KEY_ID
 from urllib.parse import urlencode, urljoin
 from types import TracebackType
 
@@ -39,12 +40,14 @@ class MotionEyeClient:
 
     def __init__(
         self,
-        base_url: str,
+        host: str,
+        port: int,
         username: str = "admin",
         password: str = "",
     ):
         """Construct a new motionEye client."""
-        self._base_url = base_url
+        self._host = host
+        self._port = port
         self._session = aiohttp.ClientSession()
         self._username = username
 
@@ -82,7 +85,9 @@ class MotionEyeClient:
                 "_username": self._username,
             }
         )
-        url = urljoin(self._base_url, path + "?" + urlencode(params))
+        url = urljoin(
+            f"http://{self._host}:{self._port}", path + "?" + urlencode(params)
+        )
         key = hashlib.sha1(self._password.encode("UTF-8")).hexdigest()
         signature = utils.compute_signature(method, url, data, key)
         url += f"&_signature={signature}"
@@ -112,7 +117,7 @@ class MotionEyeClient:
                 _LOGGER.debug("%s %s -> %i", method, url, response.status)
                 if response.status == 403:
                     _LOGGER.warning(
-                        f"Authentication failed in request to {self._base_url}: {response}"
+                        f"Authentication failed in request to {self._host}:{self._port} : {response}"
                     )
                     raise MotionEyeClientInvalidAuth(response)
                 elif not response.ok:
@@ -168,3 +173,28 @@ class MotionEyeClient:
             method="POST",
             data=config,
         )
+
+    @classmethod
+    def is_camera_streaming(cls, camera: Dict[str, Any]) -> bool:
+        """Determine if a given camera is streaming."""
+        return bool(
+            camera
+            and KEY_STREAMING_PORT in camera
+            and camera.get(KEY_VIDEO_STREAMING, False)
+        )
+
+    def get_camera_steam_url(self, camera: Dict[str, Any]) -> Optional[str]:
+        """Get the camera stream URL."""
+        if MotionEyeClient.is_camera_streaming(camera):
+            return f"http://{self._host}:{camera[KEY_STREAMING_PORT]}/"
+        return None
+
+    def get_camera_snapshot_url(self, camera: Dict[str, Any]) -> Optional[str]:
+        """Get the camera stream URL."""
+        if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
+            return None
+        snapshot_url = f"http://{self._host}:{self._port}/picture/{camera[KEY_ID]}/current/?_username={self._username}"
+        snapshot_url += "&_signature=" + utils.compute_signature_from_password(
+            "GET", snapshot_url, None, self._password
+        )
+        return snapshot_url
