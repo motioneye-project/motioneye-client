@@ -48,19 +48,19 @@ class MotionEyeClient:
         self,
         host: str,
         port: int,
-        admin_username: str = DEFAULT_USERNAME_ADMIN,
-        admin_password: str = "",
-        surveillance_username: str = DEFAULT_USERNAME_SURVEILLANCE,
-        surveillance_password: str = "",
+        username_admin: str = DEFAULT_USERNAME_ADMIN,
+        username_surveillance: str = DEFAULT_USERNAME_SURVEILLANCE,
+        password_admin: str = "",
+        password_surveillance: str = "",
     ):
         """Construct a new motionEye client."""
         self._host = host
         self._port = port
         self._session = aiohttp.ClientSession()
-        self._admin_username = admin_username
-        self._admin_password = admin_password
-        self._surveillance_username = surveillance_username
-        self._surveillance_password = surveillance_password
+        self._username_admin = username_admin
+        self._password_admin = password_admin
+        self._username_surveillance = username_surveillance
+        self._password_surveillance = password_surveillance
 
         # TODO: basic http auth
 
@@ -90,8 +90,8 @@ class MotionEyeClient:
         admin: bool = True,
     ) -> str:
         """Build a motionEye URL."""
-        username = self._admin_username if admin else self._surveillance_username
-        password = self._admin_password if admin else self._surveillance_password
+        username = self._username_admin if admin else self._username_surveillance
+        password = self._password_admin if admin else self._password_surveillance
 
         params = params or {}
         params.update(
@@ -216,11 +216,11 @@ class MotionEyeClient:
         """Get the camera stream URL."""
         if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
             return None
-        snapshot_url = f"http://{self._host}:{self._port}/picture/{camera[KEY_ID]}/current/?_username={self._surveillance_username}"
+        snapshot_url = f"http://{self._host}:{self._port}/picture/{camera[KEY_ID]}/current/?_username={self._username_surveillance}"
         snapshot_url += "&_signature=" + utils.compute_signature_from_password(
             "GET",
             snapshot_url,
             None,
-            self._surveillance_password,
+            self._password_surveillance,
         )
         return snapshot_url
