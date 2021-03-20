@@ -48,20 +48,30 @@ class MotionEyeClient:
         self,
         host: str,
         port: int,
-        username_admin: str = DEFAULT_USERNAME_ADMIN,
-        username_surveillance: str = DEFAULT_USERNAME_SURVEILLANCE,
-        password_admin: str = "",
-        password_surveillance: str = "",
+        username_admin: Optional[str] = None,
+        username_surveillance: Optional[str] = None,
+        password_admin: Optional[str] = None,
+        password_surveillance: Optional[str] = None,
     ):
         """Construct a new motionEye client."""
         self._host = host
         self._port = port
         self._session = aiohttp.ClientSession()
-        self._username_admin = username_admin
-        self._password_admin = password_admin
-        self._username_surveillance = username_surveillance
-        self._password_surveillance = password_surveillance
-
+        self._username_admin = username_admin or DEFAULT_USERNAME_ADMIN
+        self._password_admin = password_admin or ""
+        self._username_surveillance = (
+            username_surveillance or DEFAULT_USERNAME_SURVEILLANCE
+        )
+        self._password_surveillance = password_surveillance or ""
+        _LOGGER.error(
+            "%s / %s / %s / %s"
+            % (
+                self._username_admin,
+                self._password_admin,
+                self._username_surveillance,
+                self._password_surveillance,
+            )
+        )
         # TODO: basic http auth
 
     async def __aenter__(self) -> Optional["MotionEyeClient"]:
