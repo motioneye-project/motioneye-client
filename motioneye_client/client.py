@@ -8,6 +8,7 @@ from typing import cast, Any, Dict, Optional, Type
 from . import utils
 from .const import (
     DEFAULT_ADMIN_USERNAME,
+    DEFAULT_PORT,
     DEFAULT_SURVEILLANCE_USERNAME,
     KEY_STREAMING_PORT,
     KEY_VIDEO_STREAMING,
@@ -46,7 +47,7 @@ class MotionEyeClient:
     def __init__(
         self,
         host: str,
-        port: int,
+        port: int = DEFAULT_PORT,
         admin_username: Optional[str] = None,
         admin_password: Optional[str] = None,
         surveillance_username: Optional[str] = None,
