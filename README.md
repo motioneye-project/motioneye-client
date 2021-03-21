@@ -5,7 +5,7 @@
 
 # motionEye Client
 
-A simple async API client for motionEye.
+A simple async API client for [motionEye](https://github.com/ccrisan/motioneye).
 
 ## Constructor arguments
 
