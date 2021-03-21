@@ -16,9 +16,10 @@
 # You should have received a copy of the GNU General Public License
 # along with this program.  If not, see <http://www.gnu.org/licenses/>.
 
+from __future__ import annotations
+
 import hashlib
 import re
-from typing import List, Tuple, Optional
 from urllib.parse import (
     urlunsplit,
     urlsplit,
@@ -32,8 +33,8 @@ _SIGNATURE_REGEX = re.compile(r'[^a-zA-Z0-9/?_.=&{}\[\]":, -]')
 def compute_signature_from_password(
     method: str,
     path: str,
-    body: Optional[str],
-    password: Optional[str] = None,
+    body: str | None,
+    password: str | None = None,
 ) -> str:
     """Compute a request signature from a password."""
     key = hashlib.sha1((password or "").encode("UTF-8")).hexdigest()
@@ -46,10 +47,10 @@ def compute_signature_from_password(
 # ================================================================
 
 
-def compute_signature(method: str, path: str, body: Optional[str], key: str) -> str:
+def compute_signature(method: str, path: str, body: str | None, key: str) -> str:
     """Compute a request signature from a key."""
-    parts: List[str] = list(urlsplit(path))
-    query: List[Tuple[str, str]] = [
+    parts: list[str] = list(urlsplit(path))
+    query: list[tuple[str, str]] = [
         q for q in parse_qsl(parts[3], keep_blank_values=True) if (q[0] != "_signature")
     ]
     query.sort(key=lambda q: q[0])

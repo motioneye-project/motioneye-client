@@ -1,9 +1,11 @@
 """Test the motionEye client."""
+from __future__ import annotations
+
 from contextlib import closing
 import logging
 import socket
 from aiohttp import web  # type: ignore
-from typing import Any, List
+from typing import Any
 from unittest.mock import Mock
 from motioneye_client.client import MotionEyeClient
 from motioneye_client.const import KEY_STREAMING_PORT, KEY_VIDEO_STREAMING, KEY_ID
@@ -11,7 +13,7 @@ from motioneye_client.const import KEY_STREAMING_PORT, KEY_VIDEO_STREAMING, KEY_
 _LOGGER = logging.getLogger(__name__)
 
 
-async def _create_motioneye_server(aiohttp_server: Any, handlers: List[Any]) -> Any:
+async def _create_motioneye_server(aiohttp_server: Any, handlers: list[Any]) -> Any:
     app = web.Application()
     app.add_routes(handlers)
 

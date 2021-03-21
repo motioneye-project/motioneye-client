@@ -1,10 +1,12 @@
 #!/usr/bin/env python
 """Client for motionEye."""
+from __future__ import annotations
+
 import aiohttp  # type: ignore
 import hashlib
 import logging
 import json
-from typing import cast, Any, Dict, Optional, Type
+from typing import Any
 from . import utils
 from .const import (
     DEFAULT_ADMIN_USERNAME,
@@ -48,10 +50,10 @@ class MotionEyeClient:
         self,
         host: str,
         port: int = DEFAULT_PORT,
-        admin_username: Optional[str] = None,
-        admin_password: Optional[str] = None,
-        surveillance_username: Optional[str] = None,
-        surveillance_password: Optional[str] = None,
+        admin_username: str | None = None,
+        admin_password: str | None = None,
+        surveillance_username: str | None = None,
+        surveillance_password: str | None = None,
     ):
         """Construct a new motionEye client."""
         self._host = host
@@ -65,7 +67,7 @@ class MotionEyeClient:
         self._surveillance_password = surveillance_password or ""
         # TODO: basic http auth
 
-    async def __aenter__(self) -> Optional["MotionEyeClient"]:
+    async def __aenter__(self) -> "MotionEyeClient" | None:
         """Enter context manager and connect the client."""
         try:
             await self.async_client_login()
@@ -75,9 +77,9 @@ class MotionEyeClient:
 
     async def __aexit__(
         self,
-        exc_type: Optional[Type[BaseException]],
-        exc: Optional[BaseException],
-        traceback: Optional[TracebackType],
+        exc_type: type[BaseException] | None,
+        exc: type[BaseException] | None,
+        traceback: TracebackType | None,
     ) -> None:
         """Leave context manager and close the client."""
         await self.async_client_close()
@@ -85,8 +87,8 @@ class MotionEyeClient:
     def _build_url(
         self,
         path: str,
-        params: Optional[Dict[str, Any]] = None,
-        data: Optional[str] = None,
+        params: dict[str, Any] | None = None,
+        data: str | None = None,
         method: str = "GET",
         admin: bool = True,
     ) -> str:
@@ -111,10 +113,10 @@ class MotionEyeClient:
     async def _async_request(
         self,
         path: str,
-        data: Optional[Dict[str, Any]] = None,
+        data: dict[str, Any] | None = None,
         method: str = "GET",
         admin: bool = True,
-    ) -> Optional[Dict[str, Any]]:
+    ) -> dict[str, Any] | None:
         """Fetch return code and JSON from motionEye server."""
 
         serialized_json = json.dumps(data) if data else None
@@ -150,10 +152,10 @@ class MotionEyeClient:
                     )
                     raise MotionEyeClientRequestFailed(response)
                 try:
-                    return cast(
-                        Optional[Dict[str, Any]],
-                        await response.json(content_type=None),
+                    return_value: dict[str, Any] | None = await response.json(
+                        content_type=None
                     )
+                    return return_value
                 except json.decoder.JSONDecodeError:
                     _LOGGER.debug(f"Could not JSON decode: {await response.text()}")
                     raise MotionEyeClientRequestFailed(response)
@@ -161,7 +163,7 @@ class MotionEyeClient:
             _LOGGER.warning(f"Connection failed to motionEye: {exc}")
             raise MotionEyeClientConnectionFailure(exc)
 
-    async def async_client_login(self) -> Optional[Dict[str, Any]]:
+    async def async_client_login(self) -> dict[str, Any] | None:
         """Login to the motionEye server."""
 
         return await self._async_request("/login")
@@ -172,25 +174,25 @@ class MotionEyeClient:
         await self._session.close()
         return True
 
-    async def async_get_manifest(self) -> Optional[Dict[str, Any]]:
+    async def async_get_manifest(self) -> dict[str, Any] | None:
         """Get the motionEye manifest."""
         return await self._async_request("/manifest.json")
 
-    async def async_get_server_config(self) -> Optional[Dict[str, Any]]:
+    async def async_get_server_config(self) -> dict[str, Any] | None:
         """Get the motionEye server config ."""
         return await self._async_request("/config/main/get")
 
-    async def async_get_cameras(self) -> Optional[Dict[str, Any]]:
+    async def async_get_cameras(self) -> dict[str, Any] | None:
         """Get all motionEye cameras config."""
         return await self._async_request("/config/list")
 
-    async def async_get_camera(self, camera_id: int) -> Optional[Dict[str, Any]]:
+    async def async_get_camera(self, camera_id: int) -> dict[str, Any] | None:
         """Get a motionEye camera config."""
         return await self._async_request(f"/config/{camera_id}/get")
 
     async def async_set_camera(
-        self, camera_id: int, config: Dict[str, Any]
-    ) -> Optional[Dict[str, Any]]:
+        self, camera_id: int, config: dict[str, Any]
+    ) -> dict[str, Any] | None:
         """Set a motionEye camera config."""
         return await self._async_request(
             f"/config/{camera_id}/set",
@@ -199,7 +201,7 @@ class MotionEyeClient:
         )
 
     @classmethod
-    def is_camera_streaming(cls, camera: Dict[str, Any]) -> bool:
+    def is_camera_streaming(cls, camera: dict[str, Any]) -> bool:
         """Determine if a given camera is streaming."""
         return bool(
             camera
@@ -207,13 +209,13 @@ class MotionEyeClient:
             and camera.get(KEY_VIDEO_STREAMING, False)
         )
 
-    def get_camera_steam_url(self, camera: Dict[str, Any]) -> Optional[str]:
+    def get_camera_steam_url(self, camera: dict[str, Any]) -> str | None:
         """Get the camera stream URL."""
         if MotionEyeClient.is_camera_streaming(camera):
             return f"http://{self._host}:{camera[KEY_STREAMING_PORT]}/"
         return None
 
-    def get_camera_snapshot_url(self, camera: Dict[str, Any]) -> Optional[str]:
+    def get_camera_snapshot_url(self, camera: dict[str, Any]) -> str | None:
         """Get the camera stream URL."""
         if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
             return None
