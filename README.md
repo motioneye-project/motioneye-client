@@ -127,3 +127,18 @@ async def query_motioneye_server():
 
 asyncio.get_event_loop().run_until_complete(query_motioneye_server())
 ```
+
+## Building / Testing
+
+This library is built using [Poetry](https://python-poetry.org/).
+
+Building:
+
+```bash
+$ poetry build
+```
+
+Testing:
+```bash
+$ poetry run pytest
+```
