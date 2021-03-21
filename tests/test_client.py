@@ -41,8 +41,8 @@ async def test_signature(aiohttp_server: Any) -> None:
         server.host,
         server.port,
         "admin",
-        "user",
         "password",
+        "user",
         "user_password",
     ) as client:
         assert client

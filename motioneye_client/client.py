@@ -7,8 +7,8 @@ import json
 from typing import cast, Any, Dict, Optional, Type
 from . import utils
 from .const import (
-    DEFAULT_USERNAME_ADMIN,
-    DEFAULT_USERNAME_SURVEILLANCE,
+    DEFAULT_ADMIN_USERNAME,
+    DEFAULT_SURVEILLANCE_USERNAME,
     KEY_STREAMING_PORT,
     KEY_VIDEO_STREAMING,
     KEY_ID,
@@ -48,28 +48,28 @@ class MotionEyeClient:
         self,
         host: str,
         port: int,
-        username_admin: Optional[str] = None,
-        username_surveillance: Optional[str] = None,
-        password_admin: Optional[str] = None,
-        password_surveillance: Optional[str] = None,
+        admin_username: Optional[str] = None,
+        admin_password: Optional[str] = None,
+        surveillance_username: Optional[str] = None,
+        surveillance_password: Optional[str] = None,
     ):
         """Construct a new motionEye client."""
         self._host = host
         self._port = port
         self._session = aiohttp.ClientSession()
-        self._username_admin = username_admin or DEFAULT_USERNAME_ADMIN
-        self._password_admin = password_admin or ""
-        self._username_surveillance = (
-            username_surveillance or DEFAULT_USERNAME_SURVEILLANCE
+        self._admin_username = admin_username or DEFAULT_ADMIN_USERNAME
+        self._admin_password = admin_password or ""
+        self._surveillance_username = (
+            surveillance_username or DEFAULT_SURVEILLANCE_USERNAME
         )
-        self._password_surveillance = password_surveillance or ""
+        self._surveillance_password = surveillance_password or ""
         _LOGGER.error(
             "%s / %s / %s / %s"
             % (
-                self._username_admin,
-                self._password_admin,
-                self._username_surveillance,
-                self._password_surveillance,
+                self._admin_username,
+                self._admin_password,
+                self._surveillance_username,
+                self._surveillance_password,
             )
         )
         # TODO: basic http auth
@@ -100,8 +100,8 @@ class MotionEyeClient:
         admin: bool = True,
     ) -> str:
         """Build a motionEye URL."""
-        username = self._username_admin if admin else self._username_surveillance
-        password = self._password_admin if admin else self._password_surveillance
+        username = self._admin_username if admin else self._surveillance_username
+        password = self._admin_password if admin else self._surveillance_password
 
         params = params or {}
         params.update(
@@ -226,11 +226,11 @@ class MotionEyeClient:
         """Get the camera stream URL."""
         if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
             return None
-        snapshot_url = f"http://{self._host}:{self._port}/picture/{camera[KEY_ID]}/current/?_username={self._username_surveillance}"
+        snapshot_url = f"http://{self._host}:{self._port}/picture/{camera[KEY_ID]}/current/?_username={self._surveillance_username}"
         snapshot_url += "&_signature=" + utils.compute_signature_from_password(
             "GET",
             snapshot_url,
             None,
-            self._password_surveillance,
+            self._surveillance_password,
         )
         return snapshot_url
