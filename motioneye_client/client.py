@@ -18,7 +18,6 @@ from types import TracebackType
 
 
 _LOGGER = logging.getLogger(__name__)
-_LOGGER.setLevel(logging.DEBUG)
 
 # Attempts to vaguely follow the below such that when the server
 # supports a more fully-formed API, this client could be converted.
@@ -63,15 +62,6 @@ class MotionEyeClient:
             surveillance_username or DEFAULT_SURVEILLANCE_USERNAME
         )
         self._surveillance_password = surveillance_password or ""
-        _LOGGER.error(
-            "%s / %s / %s / %s"
-            % (
-                self._admin_username,
-                self._admin_password,
-                self._surveillance_username,
-                self._surveillance_password,
-            )
-        )
         # TODO: basic http auth
 
     async def __aenter__(self) -> Optional["MotionEyeClient"]:
