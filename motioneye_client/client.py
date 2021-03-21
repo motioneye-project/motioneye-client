@@ -22,10 +22,6 @@ from types import TracebackType
 
 _LOGGER = logging.getLogger(__name__)
 
-# Attempts to vaguely follow the below such that when the server
-# supports a more fully-formed API, this client could be converted.
-# https://github.com/ccrisan/motioneye/wiki/API-(Draft)
-
 
 class MotionEyeClientError(Exception):
     """General MotionEyeClient error."""
