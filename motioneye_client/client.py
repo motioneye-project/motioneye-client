@@ -197,7 +197,7 @@ class MotionEyeClient:
         )
 
     @classmethod
-    def is_camera_streaming(cls, camera: dict[str, Any]) -> bool:
+    def is_camera_streaming(cls, camera: dict[str, Any] | None) -> bool:
         """Determine if a given camera is streaming."""
         return bool(
             camera
