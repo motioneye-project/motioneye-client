@@ -1,6 +1,6 @@
 [tool.poetry]
 name = "motioneye-client"
-version = "0.2.3"
+version = "0.2.4"
 description = "motionEye client library Python Package"
 authors = ["Dermot Duffy <dermot.duffy@gmail.com>"]
 classifiers = [
@@ -23,7 +23,6 @@ license = "MIT"
 [tool.poetry.dependencies]
 python = "^3.7 | ^3.8 | ^3.9"
 aiohttp = "^3.7.4"
-pytest-cov = "^2.11.1"
 
 [tool.poetry.dev-dependencies]
 pytest = "^5.2"
