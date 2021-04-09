@@ -26,5 +26,8 @@ KEY_MOVIES = "movies"
 KEY_WEB_HOOK_NOTIFICATIONS_ENABLED = "web_hook_notifications_enabled"
 KEY_WEB_HOOK_NOTIFICATIONS_URL = "web_hook_notifications_url"
 KEY_WEB_HOOK_NOTIFICATIONS_HTTP_METHOD = "web_hook_notifications_http_method"
+KEY_WEB_HOOK_STORAGE_URL = "web_hook_storage_url"
+KEY_WEB_HOOK_STORAGE_ENABLED = "web_hook_storage_enabled"
+KEY_WEB_HOOK_STORAGE_HTTP_METHOD = "web_hook_storage_http_method"
 
 KEY_HTTP_METHOD_GET = "GET"
