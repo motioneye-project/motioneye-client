@@ -234,11 +234,11 @@ async def test_get_camera_steam_url(aiohttp_server: Any) -> None:
 async def test_get_camera_snapshot_url(aiohttp_server: Any) -> None:
     """Test retrieving the snapshot URL."""
     client = MotionEyeClient("host", 8000)
-    assert (
-        client.get_camera_snapshot_url(
-            {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True, KEY_ID: 100}
-        )
-        == "http://host:8000/picture/100/current/?_username=user&_signature=5419538a3223b63a72d79982cd7604e17442b350"
+    assert client.get_camera_snapshot_url(
+        {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True, KEY_ID: 100}
+    ) == (
+        "http://host:8000/picture/100/current/?_username=user"
+        "&_signature=5419538a3223b63a72d79982cd7604e17442b350"
     )
 
     assert not client.get_camera_snapshot_url(
