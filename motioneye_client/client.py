@@ -115,7 +115,7 @@ class MotionEyeClient:
     ) -> dict[str, Any] | None:
         """Fetch return code and JSON from motionEye server."""
 
-        serialized_json = json.dumps(data) if data else None
+        serialized_json = json.dumps(data) if data is not None else None
         url = self._build_url(
             path,
             data=serialized_json,
@@ -194,6 +194,14 @@ class MotionEyeClient:
             f"/config/{camera_id}/set",
             method="POST",
             data=config,
+        )
+
+    async def async_action(self, camera_id: int, action: str) -> dict[str, Any] | None:
+        """Trigger a motionEye action."""
+        return await self._async_request(
+            f"/action/{camera_id}/{action}",
+            method="POST",
+            data={},
         )
 
     @classmethod

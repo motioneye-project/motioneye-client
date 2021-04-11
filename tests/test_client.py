@@ -215,7 +215,6 @@ async def test_is_camera_streaming() -> None:
     )
 
     assert not MotionEyeClient.is_camera_streaming({KEY_VIDEO_STREAMING: True})
-
     assert not MotionEyeClient.is_camera_streaming({})
 
 
@@ -245,3 +244,20 @@ async def test_get_camera_snapshot_url(aiohttp_server: Any) -> None:
     assert not client.get_camera_snapshot_url(
         {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True}
     )
+
+
+async def test_action(aiohttp_server: Any) -> None:
+    """Test performing an action on a motionEye camera."""
+
+    async def action_handler(request: web.Request) -> web.Response:
+        assert await request.json() == {}
+        return web.json_response({})
+
+    action = "foo"
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.post(f"/action/100/{action}", action_handler)]
+    )
+
+    async with MotionEyeClient(server.host, server.port) as client:
+        assert client
+        assert await client.async_action(100, action) == {}

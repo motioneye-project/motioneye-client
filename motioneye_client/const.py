@@ -89,3 +89,29 @@ KEY_WEB_HOOK_CONVERSION_SPECIFIERS = {
     KEY_WEB_HOOK_CS_HOST: r"%{host}",
     KEY_WEB_HOOK_CS_MOTION_VERSION: r"%{ver}",
 }
+
+
+KEY_ACTION_SNAPSHOT = "snapshot"
+KEY_ACTION_RECORD_START = "record_start"
+KEY_ACTION_RECORD_STOP = "record_stop"
+KEY_ACTION_LOCK = "lock"
+KEY_ACTION_UNLOCK = "unlock"
+KEY_ACTION_LIGHT_ON = "light_on"
+KEY_ACTION_LIGHT_OFF = "light_off"
+KEY_ACTION_ALARM_ON = "alarm_on"
+KEY_ACTION_ALARM_OFF = "alarm_off"
+KEY_ACTION_UP = "up"
+KEY_ACTION_RIGHT = "right"
+KEY_ACTION_DOWN = "down"
+KEY_ACTION_LEFT = "left"
+KEY_ACTION_ZOOM_IN = "zoom_in"
+KEY_ACTION_ZOOM_OUT = "zoom_out"
+KEY_ACTION_PRESET_1 = "preset1"
+KEY_ACTION_PRESET_2 = "preset2"
+KEY_ACTION_PRESET_3 = "preset3"
+KEY_ACTION_PRESET_4 = "preset4"
+KEY_ACTION_PRESET_5 = "preset5"
+KEY_ACTION_PRESET_6 = "preset6"
+KEY_ACTION_PRESET_7 = "preset7"
+KEY_ACTION_PRESET_8 = "preset8"
+KEY_ACTION_PRESET_9 = "preset9"

@@ -56,6 +56,15 @@ Get the configuration of a single camera. Takes an integer `camera_id` argument.
 Set the configuration of a single camera. Takes an integer `camera_id` argument, and a
 dictionary of the same format as returned by `async_get_camera`.
 
+### async_action
+
+Perform a motionEye action on a camera. Takes an integer `camera_id` argument and an
+action string.
+
+Common actions include `snapshot`, `record_start` and `record_stop`. motionEye also 
+supports other user configurable actions which may be called in this manner. See
+[Action Buttons](https://github.com/ccrisan/motioneye/wiki/Action-Buttons) for more details.
+
 ## Convenience Methods
 
 ### is_camera_streaming
