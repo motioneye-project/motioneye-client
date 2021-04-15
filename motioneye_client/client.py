@@ -10,13 +10,13 @@ from typing import Any
 from . import utils
 from .const import (
     DEFAULT_ADMIN_USERNAME,
-    DEFAULT_PORT,
+    DEFAULT_URL_SCHEME,
     DEFAULT_SURVEILLANCE_USERNAME,
     KEY_STREAMING_PORT,
     KEY_VIDEO_STREAMING,
     KEY_ID,
 )
-from urllib.parse import urlencode, urljoin
+from urllib.parse import urlencode, urljoin, urlsplit, urlunsplit
 from types import TracebackType
 
 
@@ -27,16 +27,20 @@ class MotionEyeClientError(Exception):
     """General MotionEyeClient error."""
 
 
-class MotionEyeClientInvalidAuth(MotionEyeClientError):
+class MotionEyeClientInvalidAuthError(MotionEyeClientError):
     """Invalid motionEye authentication."""
 
 
-class MotionEyeClientConnectionFailure(MotionEyeClientError):
+class MotionEyeClientConnectionError(MotionEyeClientError):
     """Connection failure."""
 
 
-class MotionEyeClientRequestFailed(MotionEyeClientError):
+class MotionEyeClientRequestError(MotionEyeClientError):
     """Request failure."""
+
+
+class MotionEyeClientUrlParseError(MotionEyeClientError):
+    """Unable to parse the URL."""
 
 
 class MotionEyeClient:
@@ -44,16 +48,16 @@ class MotionEyeClient:
 
     def __init__(
         self,
-        host: str,
-        port: int = DEFAULT_PORT,
+        base_url: str,
         admin_username: str | None = None,
         admin_password: str | None = None,
         surveillance_username: str | None = None,
         surveillance_password: str | None = None,
     ):
         """Construct a new motionEye client."""
-        self._host = host
-        self._port = port
+        if not urlsplit(base_url).scheme:
+            base_url = f"{DEFAULT_URL_SCHEME}://" + base_url
+        self._base_url = base_url
         self._session = aiohttp.ClientSession()
         self._admin_username = admin_username or DEFAULT_ADMIN_USERNAME
         self._admin_password = admin_password or ""
@@ -61,7 +65,6 @@ class MotionEyeClient:
             surveillance_username or DEFAULT_SURVEILLANCE_USERNAME
         )
         self._surveillance_password = surveillance_password or ""
-        # TODO: basic http auth
 
     async def __aenter__(self) -> "MotionEyeClient" | None:
         """Enter context manager and connect the client."""
@@ -98,9 +101,7 @@ class MotionEyeClient:
                 "_username": username,
             }
         )
-        url = urljoin(
-            f"http://{self._host}:{self._port}", path + "?" + urlencode(params)
-        )
+        url = urljoin(self._base_url, path + "?" + urlencode(params))
         key = hashlib.sha1(password.encode("UTF-8")).hexdigest()
         signature = utils.compute_signature(method, url, data, key)
         url += f"&_signature={signature}"
@@ -139,14 +140,14 @@ class MotionEyeClient:
                 _LOGGER.debug("%s %s -> %i", method, url, response.status)
                 if response.status == 403:
                     _LOGGER.warning(
-                        f"Authentication failed in request to {self._host}:{self._port} : {response}"
+                        f"Authentication failed in request to {url} : {response}"
                     )
-                    raise MotionEyeClientInvalidAuth(response)
+                    raise MotionEyeClientInvalidAuthError(response)
                 elif not response.ok:
                     _LOGGER.warning(
                         f"Unexpected return code {response.status} for request: {url}"
                     )
-                    raise MotionEyeClientRequestFailed(response)
+                    raise MotionEyeClientRequestError(response)
                 try:
                     return_value: dict[str, Any] | None = await response.json(
                         content_type=None
@@ -154,10 +155,10 @@ class MotionEyeClient:
                     return return_value
                 except json.decoder.JSONDecodeError:
                     _LOGGER.debug(f"Could not JSON decode: {await response.text()}")
-                    raise MotionEyeClientRequestFailed(response)
+                    raise MotionEyeClientRequestError(response)
         except aiohttp.client_exceptions.ClientConnectorError as exc:
             _LOGGER.warning(f"Connection failed to motionEye: {exc}")
-            raise MotionEyeClientConnectionFailure(exc)
+            raise MotionEyeClientConnectionError(exc)
 
     async def async_client_login(self) -> dict[str, Any] | None:
         """Login to the motionEye server."""
@@ -216,14 +217,35 @@ class MotionEyeClient:
     def get_camera_steam_url(self, camera: dict[str, Any]) -> str | None:
         """Get the camera stream URL."""
         if MotionEyeClient.is_camera_streaming(camera):
-            return f"http://{self._host}:{camera[KEY_STREAMING_PORT]}/"
+            # Attempt to extract the hostname from the URL (removing the port if present)
+            host = urlsplit(self._base_url).netloc.split(":")[0]
+            if not host:
+                raise MotionEyeClientUrlParseError(
+                    f"Could not extract hostname from {self._base_url}."
+                )
+
+            # motion (the process underlying motionEye) cannot natively do https on the
+            # stream port, it will always be http regardless of what protocol is used to
+            # talk to motionEye itself.
+            return urlunsplit(
+                (
+                    DEFAULT_URL_SCHEME,
+                    f"{host}:{camera[KEY_STREAMING_PORT]}",
+                    "/",
+                    "",
+                    "",
+                )
+            )
         return None
 
     def get_camera_snapshot_url(self, camera: dict[str, Any]) -> str | None:
         """Get the camera stream URL."""
         if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
             return None
-        snapshot_url = f"http://{self._host}:{self._port}/picture/{camera[KEY_ID]}/current/?_username={self._surveillance_username}"
+        snapshot_url = urljoin(
+            self._base_url,
+            f"/picture/{camera[KEY_ID]}/current/?_username={self._surveillance_username}",
+        )
         snapshot_url += "&_signature=" + utils.compute_signature_from_password(
             "GET",
             snapshot_url,

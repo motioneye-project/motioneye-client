@@ -38,10 +38,8 @@ async def test_signature(aiohttp_server: Any) -> None:
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/login", login_handler)]
     )
-
     async with MotionEyeClient(
-        server.host,
-        server.port,
+        str(server.make_url("/")),
         "admin",
         "password",
         "user",
@@ -60,7 +58,7 @@ async def test_non_json_response(caplog: Any, aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/login", login_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert not client
     assert "Unexpected return code" in caplog.text
 
@@ -75,7 +73,7 @@ async def test_non_200_response(aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/login", login_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert not client
 
 
@@ -90,7 +88,7 @@ async def test_cannot_connect(caplog: Any, aiohttp_server: Any) -> None:
         s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         port = s.getsockname()[1]
 
-        async with MotionEyeClient("localhost", port) as client:
+        async with MotionEyeClient(f"http://localhost:{port}") as client:
             assert not client
     assert "Connection failed" in caplog.text
 
@@ -104,7 +102,7 @@ async def test_client_login_success(aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/login", login_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
 
 
@@ -121,7 +119,7 @@ async def test_client_login_failure(caplog: Any, aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/login", login_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert not client
     assert "Authentication failed" in caplog.text
 
@@ -136,7 +134,7 @@ async def test_get_manifest(aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/manifest.json", manifest_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_get_manifest() == manifest
 
@@ -151,7 +149,7 @@ async def test_get_server_config(aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/config/main/get", server_config_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_get_server_config() == server_config
 
@@ -166,7 +164,7 @@ async def test_get_cameras(aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/config/list", list_cameras_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_get_cameras() == cameras
 
@@ -181,7 +179,7 @@ async def test_get_camera(aiohttp_server: Any) -> None:
         aiohttp_server, [web.get("/config/100/get", get_camera_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_get_camera(100) == camera
 
@@ -199,7 +197,7 @@ async def test_set_camera(aiohttp_server: Any) -> None:
         aiohttp_server, [web.post("/config/100/set", set_camera_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_set_camera(100, config=camera) == {}
 
@@ -220,7 +218,7 @@ async def test_is_camera_streaming() -> None:
 
 async def test_get_camera_steam_url(aiohttp_server: Any) -> None:
     """Test retrieving the stream URL."""
-    client = MotionEyeClient("host", 8000)
+    client = MotionEyeClient("http://host:8000")
     assert (
         client.get_camera_steam_url(
             {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True}
@@ -233,7 +231,7 @@ async def test_get_camera_steam_url(aiohttp_server: Any) -> None:
 
 async def test_get_camera_snapshot_url(aiohttp_server: Any) -> None:
     """Test retrieving the snapshot URL."""
-    client = MotionEyeClient("host", 8000)
+    client = MotionEyeClient("http://host:8000")
     assert client.get_camera_snapshot_url(
         {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True, KEY_ID: 100}
     ) == (
@@ -258,6 +256,6 @@ async def test_action(aiohttp_server: Any) -> None:
         aiohttp_server, [web.post(f"/action/100/{action}", action_handler)]
     )
 
-    async with MotionEyeClient(server.host, server.port) as client:
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_action(100, action) == {}
