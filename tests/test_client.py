@@ -1,13 +1,13 @@
 """Test the motionEye client."""
 from __future__ import annotations
-
+import pytest  # type: ignore
 from contextlib import closing
 import logging
 import socket
 from aiohttp import web  # type: ignore
 from typing import Any
 from unittest.mock import Mock
-from motioneye_client.client import MotionEyeClient
+from motioneye_client.client import MotionEyeClient, MotionEyeClientUrlParseError
 from motioneye_client.const import KEY_STREAMING_PORT, KEY_VIDEO_STREAMING, KEY_ID
 
 _LOGGER = logging.getLogger(__name__)
@@ -178,7 +178,6 @@ async def test_get_camera(aiohttp_server: Any) -> None:
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/config/100/get", get_camera_handler)]
     )
-
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_get_camera(100) == camera
@@ -259,3 +258,21 @@ async def test_action(aiohttp_server: Any) -> None:
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_action(100, action) == {}
+
+
+async def test_url_with_no_scheme(aiohttp_server: Any) -> None:
+    """Test a base_url without a scheme."""
+    server = await _create_motioneye_server(aiohttp_server, [])
+
+    async with MotionEyeClient(f"{server.host}:{server.port}/") as client:
+        assert client
+
+
+async def test_url_with_no_host(aiohttp_server: Any) -> None:
+    """Test a base_url without a host."""
+    client = MotionEyeClient("http://")
+
+    with pytest.raises(MotionEyeClientUrlParseError):
+        client.get_camera_steam_url(
+            {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True}
+        )

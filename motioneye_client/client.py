@@ -55,8 +55,11 @@ class MotionEyeClient:
         surveillance_password: str | None = None,
     ):
         """Construct a new motionEye client."""
-        if not urlsplit(base_url).scheme:
+        if not base_url.lower().startswith(
+            "http://"
+        ) and not base_url.lower().startswith("https://"):
             base_url = f"{DEFAULT_URL_SCHEME}://" + base_url
+
         self._base_url = base_url
         self._session = aiohttp.ClientSession()
         self._admin_username = admin_username or DEFAULT_ADMIN_USERNAME
