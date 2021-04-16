@@ -13,8 +13,7 @@ The following arguments may be passed to the `MotionEyeClient` constructor:
 
 |Argument|Type|Default|Description|
 |--------|----|-------|-----------|
-|host    |`str`||Host or IP to connect to|
-|port    |`int`|8765|Port to connect to|
+|url     |`str`|URL of the motionEye server|
 |admin_username|`str`|admin|The motionEye admin username|
 |admin_password|`str`|""|The motionEye admin password
 |surveillance_username|`str`|user|The motionEye surveillance username|
@@ -76,7 +75,12 @@ Convenience method to take a camera dictionary (returned by `async_get_camera` o
 
 Convenience method to take a camera dictionary (returned by `async_get_camera` or
 `async_get_cameras`) and return the string URL of the streamed content (which can be
-opened separately).
+opened separately). This extracts the hostname out of the motionEye URL and attaches the
+streaming port to it -- depending on the configuration this may not necessarily lead to
+an accessible URL (e.g. in the use of motionEye behind a reverse proxy).
+
+Will raise [MotionEyeClientURLParseError](#MotionEyeClientURLParseError) if the hostname
+cannot be extracted from the motionEye server URL.
 
 ### get_camera_snapshot_url
 
@@ -89,7 +93,7 @@ The client may be used in as a context manager, which will automatically close t
 session.
 
 ```python
-async with client.MotionEyeClient("localhost", ) as mec:
+async with client.MotionEyeClient("http://localhost:8765", ) as mec:
     if not mec:
         return
     ...
@@ -101,15 +105,20 @@ async with client.MotionEyeClient("localhost", ) as mec:
 
 A generic base class -- all motionEye client exceptions inherit from this.
 
-### MotionEyeClientInvalidAuth
+### MotionEyeClientInvalidAuthError
 
 Invalid authentication detected during a request.
 
-### MotionEyeClientConnectionFailure
+### MotionEyeClientConnectionError
 
-Connected failed to given host and port.
+Connected failed to given URL.
 
-### MotionEyeClientRequestFailed
+<a name="MotionEyeClientURLParseError"></a>
+### MotionEyeClientURLParseError
+
+Unable to parse the required URL.
+
+### MotionEyeClientRequestError
 
 A request failed in some other undefined way.
 
@@ -124,7 +133,7 @@ import logging
 from motioneye_client.client import MotionEyeClient
 
 async def query_motioneye_server():
-  async with MotionEyeClient("localhost", 8765) as client:
+  async with MotionEyeClient("http://localhost:8765") as client:
       if not client:
         return
 

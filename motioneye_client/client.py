@@ -39,7 +39,7 @@ class MotionEyeClientRequestError(MotionEyeClientError):
     """Request failure."""
 
 
-class MotionEyeClientUrlParseError(MotionEyeClientError):
+class MotionEyeClientURLParseError(MotionEyeClientError):
     """Unable to parse the URL."""
 
 
@@ -48,19 +48,19 @@ class MotionEyeClient:
 
     def __init__(
         self,
-        base_url: str,
+        url: str,
         admin_username: str | None = None,
         admin_password: str | None = None,
         surveillance_username: str | None = None,
         surveillance_password: str | None = None,
     ):
         """Construct a new motionEye client."""
-        if not base_url.lower().startswith(
-            "http://"
-        ) and not base_url.lower().startswith("https://"):
-            base_url = f"{DEFAULT_URL_SCHEME}://" + base_url
+        if not url.lower().startswith("http://") and not url.lower().startswith(
+            "https://"
+        ):
+            url = f"{DEFAULT_URL_SCHEME}://" + url
 
-        self._base_url = base_url
+        self._url = url
         self._session = aiohttp.ClientSession()
         self._admin_username = admin_username or DEFAULT_ADMIN_USERNAME
         self._admin_password = admin_password or ""
@@ -104,7 +104,7 @@ class MotionEyeClient:
                 "_username": username,
             }
         )
-        url = urljoin(self._base_url, path + "?" + urlencode(params))
+        url = urljoin(self._url, path + "?" + urlencode(params))
         key = hashlib.sha1(password.encode("UTF-8")).hexdigest()
         signature = utils.compute_signature(method, url, data, key)
         url += f"&_signature={signature}"
@@ -221,10 +221,10 @@ class MotionEyeClient:
         """Get the camera stream URL."""
         if MotionEyeClient.is_camera_streaming(camera):
             # Attempt to extract the hostname from the URL (removing the port if present)
-            host = urlsplit(self._base_url).netloc.split(":")[0]
+            host = urlsplit(self._url).netloc.split(":")[0]
             if not host:
-                raise MotionEyeClientUrlParseError(
-                    f"Could not extract hostname from {self._base_url}."
+                raise MotionEyeClientURLParseError(
+                    f"Could not extract hostname from {self._url}."
                 )
 
             # motion (the process underlying motionEye) cannot natively do https on the
@@ -246,7 +246,7 @@ class MotionEyeClient:
         if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
             return None
         snapshot_url = urljoin(
-            self._base_url,
+            self._url,
             f"/picture/{camera[KEY_ID]}/current/?_username={self._surveillance_username}",
         )
         snapshot_url += "&_signature=" + utils.compute_signature_from_password(
