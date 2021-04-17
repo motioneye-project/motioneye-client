@@ -1,14 +1,14 @@
 """Test the motionEye client."""
 from __future__ import annotations
 
+from contextlib import closing
 import logging
 import socket
-from contextlib import closing
 from typing import Any
 from unittest.mock import Mock
 
-import pytest  # type: ignore
 from aiohttp import web  # type: ignore
+import pytest  # type: ignore
 
 from motioneye_client.client import MotionEyeClient, MotionEyeClientURLParseError
 from motioneye_client.const import KEY_ID, KEY_STREAMING_PORT, KEY_VIDEO_STREAMING
