@@ -60,7 +60,7 @@ dictionary of the same format as returned by `async_get_camera`.
 Perform a motionEye action on a camera. Takes an integer `camera_id` argument and an
 action string.
 
-Common actions include `snapshot`, `record_start` and `record_stop`. motionEye also 
+Common actions include `snapshot`, `record_start` and `record_stop`. motionEye also
 supports other user configurable actions which may be called in this manner. See
 [Action Buttons](https://github.com/ccrisan/motioneye/wiki/Action-Buttons) for more details.
 
@@ -71,7 +71,7 @@ supports other user configurable actions which may be called in this manner. See
 Convenience method to take a camera dictionary (returned by `async_get_camera` or
 `async_get_cameras`) and return True if the camera has video stream enabled.
 
-### get_camera_steam_url
+### get_camera_stream_url
 
 Convenience method to take a camera dictionary (returned by `async_get_camera` or
 `async_get_cameras`) and return the string URL of the streamed content (which can be
@@ -99,7 +99,7 @@ async with client.MotionEyeClient("http://localhost:8765", ) as mec:
     ...
 ````
 
-## Exceptions / Errors 
+## Exceptions / Errors
 
 ### MotionEyeClientError
 

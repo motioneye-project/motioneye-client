@@ -218,17 +218,17 @@ async def test_is_camera_streaming() -> None:
     assert not MotionEyeClient.is_camera_streaming({})
 
 
-async def test_get_camera_steam_url(aiohttp_server: Any) -> None:
+async def test_get_camera_stream_url(aiohttp_server: Any) -> None:
     """Test retrieving the stream URL."""
     client = MotionEyeClient("http://host:8000")
     assert (
-        client.get_camera_steam_url(
+        client.get_camera_stream_url(
             {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True}
         )
         == "http://host:8000/"
     )
 
-    assert not client.get_camera_steam_url({})
+    assert not client.get_camera_stream_url({})
 
 
 async def test_get_camera_snapshot_url(aiohttp_server: Any) -> None:
@@ -263,19 +263,14 @@ async def test_action(aiohttp_server: Any) -> None:
         assert await client.async_action(100, action) == {}
 
 
-async def test_url_with_no_scheme(aiohttp_server: Any) -> None:
-    """Test a url without a scheme."""
+async def test_invalid_urls(aiohttp_server: Any) -> None:
+    """Test invalid URLs."""
     server = await _create_motioneye_server(aiohttp_server, [])
 
-    async with MotionEyeClient(f"{server.host}:{server.port}/") as client:
-        assert client
-
-
-async def test_url_with_no_host(aiohttp_server: Any) -> None:
-    """Test a url without a host."""
-    client = MotionEyeClient("http://")
+    with pytest.raises(MotionEyeClientURLParseError):
+        async with MotionEyeClient(f"{server.host}:{server.port}/"):
+            pass
 
     with pytest.raises(MotionEyeClientURLParseError):
-        client.get_camera_steam_url(
-            {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True}
-        )
+        async with MotionEyeClient("http://"):
+            pass

@@ -56,10 +56,11 @@ class MotionEyeClient:
         surveillance_password: str | None = None,
     ):
         """Construct a new motionEye client."""
-        if not url.lower().startswith("http://") and not url.lower().startswith(
-            "https://"
-        ):
-            url = f"{DEFAULT_URL_SCHEME}://" + url
+        parsed = urlsplit(url)
+        if not parsed.scheme or not parsed.netloc:
+            raise MotionEyeClientURLParseError(
+                "Invalid URL, must have a URL scheme and host: %s" % url
+            )
 
         self._url = url
         self._session = aiohttp.ClientSession()
@@ -218,15 +219,12 @@ class MotionEyeClient:
             and camera.get(KEY_VIDEO_STREAMING, False)
         )
 
-    def get_camera_steam_url(self, camera: dict[str, Any]) -> str | None:
+    def get_camera_stream_url(self, camera: dict[str, Any]) -> str | None:
         """Get the camera stream URL."""
         if MotionEyeClient.is_camera_streaming(camera):
-            # Attempt to extract the hostname from the URL (removing the port if present)
+            # Extract the hostname from the URL (removing the port if present)
+            # Url validity is checking on construction so this will always succeed.
             host = urlsplit(self._url).netloc.split(":")[0]
-            if not host:
-                raise MotionEyeClientURLParseError(
-                    f"Could not extract hostname from {self._url}."
-                )
 
             # motion (the process underlying motionEye) cannot natively do https on the
             # stream port, it will always be http regardless of what protocol is used to
