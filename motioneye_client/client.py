@@ -2,23 +2,24 @@
 """Client for motionEye."""
 from __future__ import annotations
 
-import aiohttp  # type: ignore
 import hashlib
-import logging
 import json
+import logging
+from types import TracebackType
 from typing import Any
+from urllib.parse import urlencode, urljoin, urlsplit, urlunsplit
+
+import aiohttp  # type: ignore
+
 from . import utils
 from .const import (
     DEFAULT_ADMIN_USERNAME,
-    DEFAULT_URL_SCHEME,
     DEFAULT_SURVEILLANCE_USERNAME,
+    DEFAULT_URL_SCHEME,
+    KEY_ID,
     KEY_STREAMING_PORT,
     KEY_VIDEO_STREAMING,
-    KEY_ID,
 )
-from urllib.parse import urlencode, urljoin, urlsplit, urlunsplit
-from types import TracebackType
-
 
 _LOGGER = logging.getLogger(__name__)
 

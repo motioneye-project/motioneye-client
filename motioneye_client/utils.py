@@ -20,12 +20,7 @@ from __future__ import annotations
 
 import hashlib
 import re
-from urllib.parse import (
-    urlunsplit,
-    urlsplit,
-    parse_qsl,
-    quote,
-)
+from urllib.parse import parse_qsl, quote, urlsplit, urlunsplit
 
 _SIGNATURE_REGEX = re.compile(r'[^a-zA-Z0-9/?_.=&{}\[\]":, -]')
 
