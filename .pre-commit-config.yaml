@@ -52,3 +52,7 @@ repos:
           - --warn-return-any
           - --no-implicit-reexport
           - --warn-unreachable
+  - repo: https://github.com/PyCQA/isort
+    rev: 5.7.0
+    hooks:
+      - id: isort
