@@ -25,7 +25,7 @@ python = "^3.7 | ^3.8 | ^3.9"
 aiohttp = "^3.7.4"
 
 [tool.poetry.dev-dependencies]
-pytest = "^5.2"
+pytest = "^6.2"
 pytest-cov = "^2.11.1"
 pytest-aiohttp = "^0.3.0"
 codecov = "^2.1.11"
