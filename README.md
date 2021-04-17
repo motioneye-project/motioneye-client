@@ -1,7 +1,15 @@
+<img src="https://github.com/dermotduffy/hass-motioneye/blob/main/images/motioneye.png?raw=true"
+     alt="motionEye icon"
+     width="15%"
+     align="right"
+     style="float: right; margin: 10px 0px 20px 20px;" />
+
 [![PyPi](https://img.shields.io/pypi/v/motioneye-client.svg)](https://pypi.org/project/motioneye-client/)
 [![PyPi](https://img.shields.io/pypi/pyversions/motioneye-client.svg)](https://pypi.org/project/motioneye-client/)
-[![Build Status](https://travis-ci.com/dermotduffy/motioneye-client.svg?branch=master)](https://travis-ci.com/dermotduffy/motioneye-client)
-[![Coverage](https://img.shields.io/codecov/c/github/dermotduffy/motioneye-client)](https://codecov.io/gh/dermotduffy/motioneye-client)
+[![Build Status](https://img.shields.io/github/workflow/status/dermotduffy/motioneye-client/Build?style=flat-square)](https://github.com/dermotduffy/motioneye-client/actions/workflows/tests.yaml)
+[![Test Coverage](https://img.shields.io/codecov/c/gh/dermotduffy/motioneye-client?style=flat-square)](https://codecov.io/gh/dermotduffy/motioneye-client)
+[![License](https://img.shields.io/github/license/dermotduffy/hass-motioneye.svg?style=flat-square)](LICENSE)
+[![BuyMeCoffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square)](https://www.buymeacoffee.com/dermotdu)
 
 # motionEye Client
 
