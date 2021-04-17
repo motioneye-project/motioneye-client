@@ -55,7 +55,7 @@ jobs:
       - name: Install requirements
         run: |
           pip install --constraint=.github/workflows/constraints.txt pip
-          pip install -r requirements_test.txt
+          pip install -r requirements_dev.txt
       - name: Tests suite
         run: |
           pytest \
