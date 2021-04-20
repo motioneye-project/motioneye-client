@@ -5,7 +5,6 @@ description = "motionEye client library Python Package"
 authors = ["Dermot Duffy <dermot.duffy@gmail.com>"]
 classifiers = [
     "Intended Audience :: Developers",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "License :: OSI Approved :: MIT License",
@@ -21,7 +20,7 @@ readme = "README.md"
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.7 | ^3.8 | ^3.9"
+python = "^3.8 | ^3.9"
 aiohttp = "^3.7.4"
 
 [tool.poetry.dev-dependencies]
