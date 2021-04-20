@@ -56,3 +56,10 @@ console_output_style = "count"
 testpaths = [
   "tests",
 ]
+
+[tool.coverage.run]
+branch = false
+
+[tool.coverage.report]
+show_missing = true
+fail_under = 100
