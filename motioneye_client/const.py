@@ -6,12 +6,13 @@ DEFAULT_SURVEILLANCE_USERNAME = "user"
 
 KEY_CAMERAS = "cameras"
 KEY_ERROR = "error"
-KEY_NAME = "name"
 KEY_ID = "id"
-KEY_VIDEO_STREAMING = "video_streaming"
+KEY_MOTION_DETECTION = "motion_detection"
+KEY_MOVIES = "movies"
+KEY_NAME = "name"
+KEY_STILL_IMAGES = "still_images"
 KEY_STREAMING_PORT = "streaming_port"
 KEY_STREAMING_AUTH_MODE = "streaming_auth_mode"
-KEY_MOTION_DETECTION = "motion_detection"
 KEY_TEXT_OVERLAY = "text_overlay"
 KEY_TEXT_OVERLAY_LEFT = "left_text"
 KEY_TEXT_OVERLAY_RIGHT = "right_text"
@@ -21,8 +22,8 @@ KEY_TEXT_OVERLAY_CAMERA_NAME = "camera-name"
 KEY_TEXT_OVERLAY_CUSTOM_TEXT = "custom-text"
 KEY_TEXT_OVERLAY_CUSTOM_TEXT_LEFT = "custom_left_text"
 KEY_TEXT_OVERLAY_CUSTOM_TEXT_RIGHT = "custom_right_text"
-KEY_STILL_IMAGES = "still_images"
-KEY_MOVIES = "movies"
+KEY_UPLOAD_ENABLED = "upload_enabled"
+KEY_VIDEO_STREAMING = "video_streaming"
 
 KEY_WEB_HOOK_NOTIFICATIONS_ENABLED = "web_hook_notifications_enabled"
 KEY_WEB_HOOK_NOTIFICATIONS_URL = "web_hook_notifications_url"
@@ -90,7 +91,6 @@ KEY_WEB_HOOK_CONVERSION_SPECIFIERS = {
     KEY_WEB_HOOK_CS_HOST: r"%{host}",
     KEY_WEB_HOOK_CS_MOTION_VERSION: r"%{ver}",
 }
-
 
 KEY_ACTION_SNAPSHOT = "snapshot"
 KEY_ACTION_RECORD_START = "record_start"
