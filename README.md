@@ -95,6 +95,11 @@ cannot be extracted from the motionEye server URL.
 Convenience method to take a camera dictionary (returned by `async_get_camera` or
 `async_get_cameras`) and return the string URL of a single still frame.
 
+### get_movie_playback_url
+
+Convenience method to take a camera id and the path to a saved movie, and return a link
+to playback the movie.
+
 ## Context Manager
 
 The client may be used in as a context manager, which will automatically close the
@@ -125,6 +130,12 @@ Connected failed to given URL.
 ### MotionEyeClientURLParseError
 
 Unable to parse the required URL.
+
+
+### MotionEyeClientPathError
+
+Unable to parse a path.
+
 
 ### MotionEyeClientRequestError
 

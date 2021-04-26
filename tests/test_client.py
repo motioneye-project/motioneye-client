@@ -10,7 +10,11 @@ from unittest.mock import Mock
 from aiohttp import web  # type: ignore
 import pytest  # type: ignore
 
-from motioneye_client.client import MotionEyeClient, MotionEyeClientURLParseError
+from motioneye_client.client import (
+    MotionEyeClient,
+    MotionEyeClientPathError,
+    MotionEyeClientURLParseError,
+)
 from motioneye_client.const import KEY_ID, KEY_STREAMING_PORT, KEY_VIDEO_STREAMING
 
 _LOGGER = logging.getLogger(__name__)
@@ -274,3 +278,16 @@ async def test_invalid_urls(aiohttp_server: Any) -> None:
     with pytest.raises(MotionEyeClientURLParseError):
         async with MotionEyeClient("http://"):
             pass
+
+
+async def test_get_movie_playback_url(aiohttp_server: Any) -> None:
+    """Test retrieving a movie URL."""
+    client = MotionEyeClient("http://host:8000")
+    for path in ["/foo", "foo"]:
+        assert (
+            client.get_movie_playback_url(1, path)
+            == "http://host:8000/movie/1/playback/foo?_username=admin&_signature=939492dd2e7055b2f8a7118a857bdb36fc090b16"
+        )
+
+    with pytest.raises(MotionEyeClientPathError):
+        client.get_movie_playback_url(1, "")

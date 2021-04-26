@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+from pathlib import PurePath
 from types import TracebackType
 from typing import Any
 from urllib.parse import urlencode, urljoin, urlsplit, urlunsplit
@@ -42,6 +43,10 @@ class MotionEyeClientRequestError(MotionEyeClientError):
 
 class MotionEyeClientURLParseError(MotionEyeClientError):
     """Unable to parse the URL."""
+
+
+class MotionEyeClientPathError(MotionEyeClientError):
+    """Invalid path provided."""
 
 
 class MotionEyeClient:
@@ -244,14 +249,26 @@ class MotionEyeClient:
         """Get the camera stream URL."""
         if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
             return None
-        snapshot_url = urljoin(
-            self._url,
-            f"/picture/{camera[KEY_ID]}/current/?_username={self._surveillance_username}",
+        return self._build_url(
+            urljoin(
+                self._url,
+                f"/picture/{camera[KEY_ID]}/current/",
+            ),
+            admin=False,
         )
-        snapshot_url += "&_signature=" + utils.compute_signature_from_password(
-            "GET",
-            snapshot_url,
-            None,
-            self._surveillance_password,
+
+    def get_movie_playback_url(self, camera_id: int, path: str) -> str:
+        """Get the movie playback URL."""
+
+        pure_path = PurePath(path)
+        if not pure_path.parts:
+            raise MotionEyeClientPathError("Empty path specified for movie playback")
+        if pure_path.parts[0] == "/":
+            path = str(PurePath(*pure_path.parts[1:]))
+
+        return self._build_url(
+            urljoin(
+                self._url,
+                f"/movie/{camera_id}/playback/{path}",
+            )
         )
-        return snapshot_url
