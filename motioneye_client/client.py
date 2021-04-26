@@ -172,12 +172,10 @@ class MotionEyeClient:
 
     async def async_client_login(self) -> dict[str, Any] | None:
         """Login to the motionEye server."""
-
         return await self._async_request("/login")
 
     async def async_client_close(self) -> bool:
         """Disconnect to the MotionEye server."""
-
         await self._session.close()
         return True
 
@@ -272,3 +270,7 @@ class MotionEyeClient:
                 f"/movie/{camera_id}/playback/{path}",
             )
         )
+
+    async def async_get_movies(self, camera_id: int) -> dict[str, Any] | None:
+        """Get a motionEye camera config."""
+        return await self._async_request(f"/movie/{camera_id}/list")

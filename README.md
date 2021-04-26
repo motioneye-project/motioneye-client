@@ -72,6 +72,10 @@ Common actions include `snapshot`, `record_start` and `record_stop`. motionEye a
 supports other user configurable actions which may be called in this manner. See
 [Action Buttons](https://github.com/ccrisan/motioneye/wiki/Action-Buttons) for more details.
 
+### async_get_movies
+
+Get a list of recorded movies for a given `camera_id`.
+
 ## Convenience Methods
 
 ### is_camera_streaming

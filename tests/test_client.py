@@ -291,3 +291,16 @@ async def test_get_movie_playback_url(aiohttp_server: Any) -> None:
 
     with pytest.raises(MotionEyeClientPathError):
         client.get_movie_playback_url(1, "")
+
+
+async def test_get_movies(aiohttp_server: Any) -> None:
+    """Test getting motionEye movies."""
+
+    get_movies_handler = Mock(return_value=web.json_response({"one": "two"}))
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/movie/100/list", get_movies_handler)]
+    )
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_movies(100) == {"one": "two"}
