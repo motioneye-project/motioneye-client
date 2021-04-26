@@ -76,6 +76,10 @@ supports other user configurable actions which may be called in this manner. See
 
 Get a list of recorded movies for a given `camera_id`.
 
+### async_get_images
+
+Get a list of saved images for a given `camera_id`.
+
 ## Convenience Methods
 
 ### is_camera_streaming

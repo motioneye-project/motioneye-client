@@ -293,7 +293,7 @@ async def test_get_movie_playback_url(aiohttp_server: Any) -> None:
         client.get_movie_playback_url(1, "")
 
 
-async def test_get_movies(aiohttp_server: Any) -> None:
+async def test_async_get_movies(aiohttp_server: Any) -> None:
     """Test getting motionEye movies."""
 
     get_movies_handler = Mock(return_value=web.json_response({"one": "two"}))
@@ -304,3 +304,16 @@ async def test_get_movies(aiohttp_server: Any) -> None:
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_get_movies(100) == {"one": "two"}
+
+
+async def test_async_get_images(aiohttp_server: Any) -> None:
+    """Test getting motionEye images."""
+
+    get_images_handler = Mock(return_value=web.json_response({"two": "three"}))
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/picture/100/list", get_images_handler)]
+    )
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_images(100) == {"two": "three"}

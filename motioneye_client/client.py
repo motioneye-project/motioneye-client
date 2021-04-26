@@ -274,3 +274,7 @@ class MotionEyeClient:
     async def async_get_movies(self, camera_id: int) -> dict[str, Any] | None:
         """Get a motionEye camera config."""
         return await self._async_request(f"/movie/{camera_id}/list")
+
+    async def async_get_images(self, camera_id: int) -> dict[str, Any] | None:
+        """Get a motionEye camera config."""
+        return await self._async_request(f"/picture/{camera_id}/list")
