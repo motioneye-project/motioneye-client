@@ -103,10 +103,15 @@ cannot be extracted from the motionEye server URL.
 Convenience method to take a camera dictionary (returned by `async_get_camera` or
 `async_get_cameras`) and return the string URL of a single still frame.
 
-### get_movie_playback_url
+### get_movie_url
 
 Convenience method to take a camera id and the path to a saved movie, and return a link
 to playback the movie.
+
+### get_image_url
+
+Convenience method to take a camera id and the path to a saved image, and return a link
+to that image.
 
 ## Context Manager
 

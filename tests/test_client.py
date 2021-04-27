@@ -280,17 +280,30 @@ async def test_invalid_urls(aiohttp_server: Any) -> None:
             pass
 
 
-async def test_get_movie_playback_url(aiohttp_server: Any) -> None:
+async def test_get_movie_url(aiohttp_server: Any) -> None:
     """Test retrieving a movie URL."""
     client = MotionEyeClient("http://host:8000")
     for path in ["/foo", "foo"]:
         assert (
-            client.get_movie_playback_url(1, path)
+            client.get_movie_url(1, path)
             == "http://host:8000/movie/1/playback/foo?_username=admin&_signature=939492dd2e7055b2f8a7118a857bdb36fc090b16"
         )
 
     with pytest.raises(MotionEyeClientPathError):
-        client.get_movie_playback_url(1, "")
+        client.get_movie_url(1, "")
+
+
+async def test_get_image_url(aiohttp_server: Any) -> None:
+    """Test retrieving an image URL."""
+    client = MotionEyeClient("http://host:8000")
+    for path in ["/foo", "foo"]:
+        assert (
+            client.get_image_url(1, path)
+            == "http://host:8000/picture/1/download/foo?_username=admin&_signature=313dfb7f4244ea666fc65ea2149f8082209e213d"
+        )
+
+    with pytest.raises(MotionEyeClientPathError):
+        client.get_image_url(1, "")
 
 
 async def test_async_get_movies(aiohttp_server: Any) -> None:

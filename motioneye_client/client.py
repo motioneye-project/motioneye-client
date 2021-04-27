@@ -255,19 +255,30 @@ class MotionEyeClient:
             admin=False,
         )
 
-    def get_movie_playback_url(self, camera_id: int, path: str) -> str:
-        """Get the movie playback URL."""
-
+    def _strip_leading_slash(self, path: str) -> str:
+        """Strip leading slash from a path."""
         pure_path = PurePath(path)
         if not pure_path.parts:
-            raise MotionEyeClientPathError("Empty path specified for movie playback")
+            raise MotionEyeClientPathError("Could not parse empty path")
         if pure_path.parts[0] == "/":
             path = str(PurePath(*pure_path.parts[1:]))
+        return path
 
+    def get_movie_url(self, camera_id: int, path: str) -> str:
+        """Get the movie playback URL."""
         return self._build_url(
             urljoin(
                 self._url,
-                f"/movie/{camera_id}/playback/{path}",
+                f"/movie/{camera_id}/playback/{self._strip_leading_slash(path)}",
+            )
+        )
+
+    def get_image_url(self, camera_id: int, path: str) -> str:
+        """Get the image URL."""
+        return self._build_url(
+            urljoin(
+                self._url,
+                f"/picture/{camera_id}/download/{self._strip_leading_slash(path)}",
             )
         )
 
