@@ -10,7 +10,11 @@ from unittest.mock import Mock
 from aiohttp import web  # type: ignore
 import pytest  # type: ignore
 
-from motioneye_client.client import MotionEyeClient, MotionEyeClientURLParseError
+from motioneye_client.client import (
+    MotionEyeClient,
+    MotionEyeClientPathError,
+    MotionEyeClientURLParseError,
+)
 from motioneye_client.const import KEY_ID, KEY_STREAMING_PORT, KEY_VIDEO_STREAMING
 
 _LOGGER = logging.getLogger(__name__)
@@ -274,3 +278,55 @@ async def test_invalid_urls(aiohttp_server: Any) -> None:
     with pytest.raises(MotionEyeClientURLParseError):
         async with MotionEyeClient("http://"):
             pass
+
+
+async def test_get_movie_url(aiohttp_server: Any) -> None:
+    """Test retrieving a movie URL."""
+    client = MotionEyeClient("http://host:8000")
+    for path in ["/foo", "foo"]:
+        assert (
+            client.get_movie_url(1, path)
+            == "http://host:8000/movie/1/playback/foo?_username=admin&_signature=939492dd2e7055b2f8a7118a857bdb36fc090b16"
+        )
+
+    with pytest.raises(MotionEyeClientPathError):
+        client.get_movie_url(1, "")
+
+
+async def test_get_image_url(aiohttp_server: Any) -> None:
+    """Test retrieving an image URL."""
+    client = MotionEyeClient("http://host:8000")
+    for path in ["/foo", "foo"]:
+        assert (
+            client.get_image_url(1, path)
+            == "http://host:8000/picture/1/download/foo?_username=admin&_signature=313dfb7f4244ea666fc65ea2149f8082209e213d"
+        )
+
+    with pytest.raises(MotionEyeClientPathError):
+        client.get_image_url(1, "")
+
+
+async def test_async_get_movies(aiohttp_server: Any) -> None:
+    """Test getting motionEye movies."""
+
+    get_movies_handler = Mock(return_value=web.json_response({"one": "two"}))
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/movie/100/list", get_movies_handler)]
+    )
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_movies(100) == {"one": "two"}
+
+
+async def test_async_get_images(aiohttp_server: Any) -> None:
+    """Test getting motionEye images."""
+
+    get_images_handler = Mock(return_value=web.json_response({"two": "three"}))
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.get("/picture/100/list", get_images_handler)]
+    )
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_images(100) == {"two": "three"}

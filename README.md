@@ -72,6 +72,14 @@ Common actions include `snapshot`, `record_start` and `record_stop`. motionEye a
 supports other user configurable actions which may be called in this manner. See
 [Action Buttons](https://github.com/ccrisan/motioneye/wiki/Action-Buttons) for more details.
 
+### async_get_movies
+
+Get a list of recorded movies for a given `camera_id`.
+
+### async_get_images
+
+Get a list of saved images for a given `camera_id`.
+
 ## Convenience Methods
 
 ### is_camera_streaming
@@ -94,6 +102,16 @@ cannot be extracted from the motionEye server URL.
 
 Convenience method to take a camera dictionary (returned by `async_get_camera` or
 `async_get_cameras`) and return the string URL of a single still frame.
+
+### get_movie_url
+
+Convenience method to take a camera id and the path to a saved movie, and return a link
+to playback the movie.
+
+### get_image_url
+
+Convenience method to take a camera id and the path to a saved image, and return a link
+to that image.
 
 ## Context Manager
 
@@ -125,6 +143,12 @@ Connected failed to given URL.
 ### MotionEyeClientURLParseError
 
 Unable to parse the required URL.
+
+
+### MotionEyeClientPathError
+
+Unable to parse a path.
+
 
 ### MotionEyeClientRequestError
 

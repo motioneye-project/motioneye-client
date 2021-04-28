@@ -5,6 +5,7 @@ from __future__ import annotations
 import hashlib
 import json
 import logging
+from pathlib import PurePath
 from types import TracebackType
 from typing import Any
 from urllib.parse import urlencode, urljoin, urlsplit, urlunsplit
@@ -42,6 +43,10 @@ class MotionEyeClientRequestError(MotionEyeClientError):
 
 class MotionEyeClientURLParseError(MotionEyeClientError):
     """Unable to parse the URL."""
+
+
+class MotionEyeClientPathError(MotionEyeClientError):
+    """Invalid path provided."""
 
 
 class MotionEyeClient:
@@ -167,12 +172,10 @@ class MotionEyeClient:
 
     async def async_client_login(self) -> dict[str, Any] | None:
         """Login to the motionEye server."""
-
         return await self._async_request("/login")
 
     async def async_client_close(self) -> bool:
         """Disconnect to the MotionEye server."""
-
         await self._session.close()
         return True
 
@@ -244,14 +247,45 @@ class MotionEyeClient:
         """Get the camera stream URL."""
         if not MotionEyeClient.is_camera_streaming(camera) or KEY_ID not in camera:
             return None
-        snapshot_url = urljoin(
-            self._url,
-            f"/picture/{camera[KEY_ID]}/current/?_username={self._surveillance_username}",
+        return self._build_url(
+            urljoin(
+                self._url,
+                f"/picture/{camera[KEY_ID]}/current/",
+            ),
+            admin=False,
         )
-        snapshot_url += "&_signature=" + utils.compute_signature_from_password(
-            "GET",
-            snapshot_url,
-            None,
-            self._surveillance_password,
+
+    def _strip_leading_slash(self, path: str) -> str:
+        """Strip leading slash from a path."""
+        pure_path = PurePath(path)
+        if not pure_path.parts:
+            raise MotionEyeClientPathError("Could not parse empty path")
+        if pure_path.parts[0] == "/":
+            path = str(PurePath(*pure_path.parts[1:]))
+        return path
+
+    def get_movie_url(self, camera_id: int, path: str) -> str:
+        """Get the movie playback URL."""
+        return self._build_url(
+            urljoin(
+                self._url,
+                f"/movie/{camera_id}/playback/{self._strip_leading_slash(path)}",
+            )
         )
-        return snapshot_url
+
+    def get_image_url(self, camera_id: int, path: str) -> str:
+        """Get the image URL."""
+        return self._build_url(
+            urljoin(
+                self._url,
+                f"/picture/{camera_id}/download/{self._strip_leading_slash(path)}",
+            )
+        )
+
+    async def async_get_movies(self, camera_id: int) -> dict[str, Any] | None:
+        """Get a motionEye camera config."""
+        return await self._async_request(f"/movie/{camera_id}/list")
+
+    async def async_get_images(self, camera_id: int) -> dict[str, Any] | None:
+        """Get a motionEye camera config."""
+        return await self._async_request(f"/picture/{camera_id}/list")
