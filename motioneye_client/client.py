@@ -264,21 +264,23 @@ class MotionEyeClient:
             path = str(PurePath(*pure_path.parts[1:]))
         return path
 
-    def get_movie_url(self, camera_id: int, path: str) -> str:
+    def get_movie_url(self, camera_id: int, path: str, preview: bool = False) -> str:
         """Get the movie playback URL."""
+        action = "preview" if preview else "playback"
         return self._build_url(
             urljoin(
                 self._url,
-                f"/movie/{camera_id}/playback/{self._strip_leading_slash(path)}",
+                f"/movie/{camera_id}/{action}/{self._strip_leading_slash(path)}",
             )
         )
 
-    def get_image_url(self, camera_id: int, path: str) -> str:
+    def get_image_url(self, camera_id: int, path: str, preview: bool = False) -> str:
         """Get the image URL."""
+        action = "preview" if preview else "download"
         return self._build_url(
             urljoin(
                 self._url,
-                f"/picture/{camera_id}/download/{self._strip_leading_slash(path)}",
+                f"/picture/{camera_id}/{action}/{self._strip_leading_slash(path)}",
             )
         )
 

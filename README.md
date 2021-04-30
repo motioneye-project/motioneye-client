@@ -106,12 +106,12 @@ Convenience method to take a camera dictionary (returned by `async_get_camera` o
 ### get_movie_url
 
 Convenience method to take a camera id and the path to a saved movie, and return a link
-to playback the movie.
+to playback the movie. Takes a `preview` argument that if `True` returns a URL to a thumbnail.
 
 ### get_image_url
 
 Convenience method to take a camera id and the path to a saved image, and return a link
-to that image.
+to that image. Takes a `preview` argument that if `True` returns a URL to a thumbnail.
 
 ## Context Manager
 
