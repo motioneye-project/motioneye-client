@@ -288,6 +288,10 @@ async def test_get_movie_url(aiohttp_server: Any) -> None:
             client.get_movie_url(1, path)
             == "http://host:8000/movie/1/playback/foo?_username=admin&_signature=939492dd2e7055b2f8a7118a857bdb36fc090b16"
         )
+        assert (
+            client.get_movie_url(1, path, preview=True)
+            == "http://host:8000/movie/1/preview/foo?_username=admin&_signature=b5f3ce5540e4d179dec2fa22f82e18caeccb5e6b"
+        )
 
     with pytest.raises(MotionEyeClientPathError):
         client.get_movie_url(1, "")
@@ -300,6 +304,10 @@ async def test_get_image_url(aiohttp_server: Any) -> None:
         assert (
             client.get_image_url(1, path)
             == "http://host:8000/picture/1/download/foo?_username=admin&_signature=313dfb7f4244ea666fc65ea2149f8082209e213d"
+        )
+        assert (
+            client.get_image_url(1, path, preview=True)
+            == "http://host:8000/picture/1/preview/foo?_username=admin&_signature=b4015fc7dadde4e85edfd71b8f40a8f7eacedbb4"
         )
 
     with pytest.raises(MotionEyeClientPathError):
