@@ -317,24 +317,46 @@ async def test_get_image_url(aiohttp_server: Any) -> None:
 async def test_async_get_movies(aiohttp_server: Any) -> None:
     """Test getting motionEye movies."""
 
-    get_movies_handler = Mock(return_value=web.json_response({"one": "two"}))
+    async def get_movies_handler(request: web.Request) -> web.Response:
+        assert "prefix" not in request.query
+        return web.json_response({"one": "two"})
+
+    async def get_movies_prefix_handler(request: web.Request) -> web.Response:
+        assert request.query["prefix"] == "moo"
+        return web.json_response({"three": "four"})
 
     server = await _create_motioneye_server(
-        aiohttp_server, [web.get("/movie/100/list", get_movies_handler)]
+        aiohttp_server,
+        [
+            web.get("/movie/100/list", get_movies_handler),
+            web.get("/movie/101/list", get_movies_prefix_handler),
+        ],
     )
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
         assert await client.async_get_movies(100) == {"one": "two"}
+        assert await client.async_get_movies(101, prefix="moo") == {"three": "four"}
 
 
 async def test_async_get_images(aiohttp_server: Any) -> None:
     """Test getting motionEye images."""
 
-    get_images_handler = Mock(return_value=web.json_response({"two": "three"}))
+    async def get_images_handler(request: web.Request) -> web.Response:
+        assert "prefix" not in request.query
+        return web.json_response({"one": "two"})
+
+    async def get_images_prefix_handler(request: web.Request) -> web.Response:
+        assert request.query["prefix"] == "moo"
+        return web.json_response({"three": "four"})
 
     server = await _create_motioneye_server(
-        aiohttp_server, [web.get("/picture/100/list", get_images_handler)]
+        aiohttp_server,
+        [
+            web.get("/picture/100/list", get_images_handler),
+            web.get("/picture/101/list", get_images_prefix_handler),
+        ],
     )
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert client
-        assert await client.async_get_images(100) == {"two": "three"}
+        assert await client.async_get_images(100) == {"one": "two"}
+        assert await client.async_get_images(101, prefix="moo") == {"three": "four"}

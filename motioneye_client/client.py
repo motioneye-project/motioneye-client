@@ -120,6 +120,7 @@ class MotionEyeClient:
     async def _async_request(
         self,
         path: str,
+        params: dict[str, Any] | None = None,
         data: dict[str, Any] | None = None,
         method: str = "GET",
         admin: bool = True,
@@ -129,6 +130,7 @@ class MotionEyeClient:
         serialized_json = json.dumps(data) if data is not None else None
         url = self._build_url(
             path,
+            params=params,
             data=serialized_json,
             method=method,
             admin=admin,
@@ -284,10 +286,18 @@ class MotionEyeClient:
             )
         )
 
-    async def async_get_movies(self, camera_id: int) -> dict[str, Any] | None:
+    async def async_get_movies(
+        self, camera_id: int, prefix: str | None = None
+    ) -> dict[str, Any] | None:
         """Get a motionEye camera config."""
-        return await self._async_request(f"/movie/{camera_id}/list")
+        return await self._async_request(
+            f"/movie/{camera_id}/list", params={"prefix": prefix} if prefix else None
+        )
 
-    async def async_get_images(self, camera_id: int) -> dict[str, Any] | None:
+    async def async_get_images(
+        self, camera_id: int, prefix: str | None = None
+    ) -> dict[str, Any] | None:
         """Get a motionEye camera config."""
-        return await self._async_request(f"/picture/{camera_id}/list")
+        return await self._async_request(
+            f"/picture/{camera_id}/list", params={"prefix": prefix} if prefix else None
+        )
