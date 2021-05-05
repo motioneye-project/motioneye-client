@@ -157,7 +157,7 @@ class MotionEyeClient:
                     raise MotionEyeClientInvalidAuthError(response)
                 elif not response.ok:
                     _LOGGER.warning(
-                        f"Unexpected return code {response.status} for request: {url}"
+                        f"Unexpected HTTP response status code {response.status} for request: {url}"
                     )
                     raise MotionEyeClientRequestError(response)
                 try:
@@ -165,12 +165,15 @@ class MotionEyeClient:
                         content_type=None
                     )
                     return return_value
-                except json.decoder.JSONDecodeError:
-                    _LOGGER.debug(f"Could not JSON decode: {await response.text()}")
-                    raise MotionEyeClientRequestError(response)
+                except (json.decoder.JSONDecodeError, UnicodeDecodeError) as exc:
+                    _LOGGER.error(f"Could not JSON decode: {await response.read()}")
+                    raise MotionEyeClientRequestError(response) from exc
         except aiohttp.client_exceptions.ClientConnectorError as exc:
             _LOGGER.warning(f"Connection failed to motionEye: {exc}")
-            raise MotionEyeClientConnectionError(exc)
+            raise MotionEyeClientConnectionError(exc) from exc
+        except aiohttp.client_exceptions.ClientError as exc:
+            _LOGGER.warning(f"Request failed to motionEye: {exc}")
+            raise MotionEyeClientRequestError(exc) from exc
 
     async def async_client_login(self) -> dict[str, Any] | None:
         """Login to the motionEye server."""
