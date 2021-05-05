@@ -50,15 +50,8 @@ forced_separate = [
 combine_as_imports = true
 
 [tool.pytest.ini_options]
-addopts = "-qq --timeout=9 --cov=motioneye_client"
+addopts = "-qq --timeout=9 --cov-report=html:htmlcov --cov-report=xml:coverage.xml --cov-report=term-missing --cov=motioneye_client --cov-fail-under=100"
 console_output_style = "count"
 testpaths = [
   "tests",
 ]
-
-[tool.coverage.run]
-branch = false
-
-[tool.coverage.report]
-show_missing = true
-fail_under = 100
