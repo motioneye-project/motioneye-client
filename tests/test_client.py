@@ -1,6 +1,7 @@
 """Test the motionEye client."""
 from __future__ import annotations
 
+import asyncio
 from contextlib import closing
 import logging
 import socket
@@ -13,6 +14,7 @@ import pytest  # type: ignore
 from motioneye_client.client import (
     MotionEyeClient,
     MotionEyeClientPathError,
+    MotionEyeClientRequestError,
     MotionEyeClientURLParseError,
 )
 from motioneye_client.const import KEY_ID, KEY_STREAMING_PORT, KEY_VIDEO_STREAMING
@@ -55,11 +57,11 @@ async def test_signature(aiohttp_server: Any) -> None:
         assert client
 
 
-async def test_non_json_response(caplog: Any, aiohttp_server: Any) -> None:
+async def test_failed_request(caplog: Any, aiohttp_server: Any) -> None:
     """Test a non-JSON response."""
 
     async def login_handler(request: web.Request) -> web.Response:
-        raise web.HTTPForbidden("naughty")
+        raise web.HTTPNotFound()
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/login", login_handler)]
@@ -67,7 +69,7 @@ async def test_non_json_response(caplog: Any, aiohttp_server: Any) -> None:
 
     async with MotionEyeClient(str(server.make_url("/"))) as client:
         assert not client
-    assert "Unexpected return code" in caplog.text
+    assert "Unexpected HTTP response status" in caplog.text
 
 
 async def test_non_200_response(aiohttp_server: Any) -> None:
@@ -360,3 +362,57 @@ async def test_async_get_images(aiohttp_server: Any) -> None:
         assert client
         assert await client.async_get_images(100) == {"one": "two"}
         assert await client.async_get_images(101, prefix="moo") == {"three": "four"}
+
+
+async def test_client_response_error(aiohttp_server: Any) -> None:
+    """Test invalid server."""
+
+    async def not_motioneye_server(
+        reader: asyncio.StreamReader, writer: asyncio.StreamWriter
+    ) -> None:
+        writer.close()
+
+    with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
+        s.bind(("localhost", 0))
+        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        port = s.getsockname()[1]
+
+        await asyncio.start_server(not_motioneye_server, "127.0.0.1", port)
+
+        with pytest.raises(MotionEyeClientRequestError):
+            client = MotionEyeClient(f"http://localhost:{port}/")
+            await client.async_client_login()
+
+        await client.async_client_close()
+
+
+async def test_unicode_decode_error(aiohttp_server: Any) -> None:
+    """Test unicode bytes that cannot be decoded."""
+
+    app = web.Application()
+    login_handler = Mock(
+        return_value=web.Response(
+            body=b"\xff", charset="UTF-8", content_type="application/octet-stream"
+        )
+    )
+    app.add_routes([web.get("/login", login_handler)])
+    server = await aiohttp_server(app)
+
+    with pytest.raises(MotionEyeClientRequestError):
+        client = MotionEyeClient(str(server.make_url("/")))
+        await client.async_client_login()
+    await client.async_client_close()
+
+
+async def test_json_decode_error(aiohttp_server: Any) -> None:
+    """Test JSON that cannot be decoded."""
+
+    app = web.Application()
+    login_handler = Mock(return_value=web.Response(body="this is not valid json"))
+    app.add_routes([web.get("/login", login_handler)])
+    server = await aiohttp_server(app)
+
+    with pytest.raises(MotionEyeClientRequestError):
+        client = MotionEyeClient(str(server.make_url("/")))
+        await client.async_client_login()
+    await client.async_client_close()
