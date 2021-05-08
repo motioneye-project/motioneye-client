@@ -4,6 +4,7 @@ DEFAULT_PORT = 8765
 DEFAULT_URL_SCHEME = "http"
 DEFAULT_SURVEILLANCE_USERNAME = "user"
 
+KEY_ACTIONS = "actions"
 KEY_CAMERAS = "cameras"
 KEY_ERROR = "error"
 KEY_ID = "id"
