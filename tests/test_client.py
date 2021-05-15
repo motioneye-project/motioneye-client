@@ -416,3 +416,23 @@ async def test_json_decode_error(aiohttp_server: Any) -> None:
         client = MotionEyeClient(str(server.make_url("/")))
         await client.async_client_login()
     await client.async_client_close()
+
+
+async def test_is_file_type_image() -> None:
+    """Test is_file_type_image."""
+
+    client = MotionEyeClient("http://localhost")
+    assert client.is_file_type_image(0)
+    assert client.is_file_type_image(7)
+    assert not client.is_file_type_image(8)
+    assert not client.is_file_type_image(100)
+
+
+async def test_is_file_type_movie() -> None:
+    """Test is_file_type_image."""
+
+    client = MotionEyeClient("http://localhost")
+    assert not client.is_file_type_movie(0)
+    assert not client.is_file_type_movie(7)
+    assert client.is_file_type_movie(8)
+    assert client.is_file_type_movie(100)

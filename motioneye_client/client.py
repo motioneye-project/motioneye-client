@@ -289,6 +289,18 @@ class MotionEyeClient:
             )
         )
 
+    @classmethod
+    def is_file_type_image(self, file_type: int) -> bool:
+        """Determine if a file_type represents an image."""
+        # It's an image if the event file_type is <8.
+        # See: https://github.com/Motion-Project/motion/blob/master/src/motion.h#L177
+        return file_type < 8
+
+    @classmethod
+    def is_file_type_movie(self, file_type: int) -> bool:
+        """Determine if a file_type represents an image."""
+        return not self.is_file_type_image(file_type)
+
     async def async_get_movies(
         self, camera_id: int, prefix: str | None = None
     ) -> dict[str, Any] | None:
