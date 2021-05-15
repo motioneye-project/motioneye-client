@@ -19,13 +19,13 @@ A simple async API client for [motionEye](https://github.com/ccrisan/motioneye).
 
 The following arguments may be passed to the `MotionEyeClient` constructor:
 
-|Argument|Type|Default|Description|
-|--------|----|-------|-----------|
-|url     |`str`|URL of the motionEye server|
-|admin_username|`str`|admin|The motionEye admin username|
-|admin_password|`str`|""|The motionEye admin password
-|surveillance_username|`str`|user|The motionEye surveillance username|
-|surveillance_password|`str`|""|The motionEye surveillance password|
+| Argument              | Type  | Default                     | Description                         |
+| --------------------- | ----- | --------------------------- | ----------------------------------- |
+| url                   | `str` | URL of the motionEye server |
+| admin_username        | `str` | admin                       | The motionEye admin username        |
+| admin_password        | `str` | ""                          | The motionEye admin password        |
+| surveillance_username | `str` | user                        | The motionEye surveillance username |
+| surveillance_password | `str` | ""                          | The motionEye surveillance password |
 
 This client needs both `admin` and `surveillance` passwords in order to interact with
 the API (which generally require the `admin` user), as well as prepare the URLs for
@@ -114,6 +114,10 @@ to playback the movie. Takes a `preview` argument that if `True` returns a URL t
 
 Convenience method to take a camera id and the path to a saved image, and return a link
 to that image. Takes a `preview` argument that if `True` returns a URL to a thumbnail.
+
+### is_file_type_image / is_file_type_movie
+
+Determine if a given file_type `int` (from a web hook callback) represents an image or a movie respectively.
 
 ## Context Manager
 
