@@ -38,6 +38,9 @@ KEY_WEB_HOOK_STORAGE_HTTP_METHOD = "web_hook_storage_http_method"
 KEY_WEB_HOOK_STORAGE_URL = "web_hook_storage_url"
 
 KEY_HTTP_METHOD_GET = "GET"
+KEY_HTTP_METHOD_POST_JSON = "POSTj"
+KEY_HTTP_METHOD_POST_QUERY = "POST"
+KEY_HTTP_METHOD_POST_FORM = "POSTf"
 
 # Conversion specifiers.
 # https://motion-project.github.io/motion_config.html#conversion_specifiers
