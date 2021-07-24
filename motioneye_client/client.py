@@ -59,6 +59,7 @@ class MotionEyeClient:
         admin_password: str | None = None,
         surveillance_username: str | None = None,
         surveillance_password: str | None = None,
+        session: aiohttp.ClientSession | None = None,
     ):
         """Construct a new motionEye client."""
         parsed = urlsplit(url)
@@ -68,7 +69,7 @@ class MotionEyeClient:
             )
 
         self._url = url
-        self._session = aiohttp.ClientSession()
+        self._session = session or aiohttp.ClientSession()
         self._admin_username = admin_username or DEFAULT_ADMIN_USERNAME
         self._admin_password = admin_password or ""
         self._surveillance_username = (

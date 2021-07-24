@@ -19,13 +19,14 @@ A simple async API client for [motionEye](https://github.com/ccrisan/motioneye).
 
 The following arguments may be passed to the `MotionEyeClient` constructor:
 
-| Argument              | Type  | Default                     | Description                         |
-| --------------------- | ----- | --------------------------- | ----------------------------------- |
-| url                   | `str` | URL of the motionEye server |
-| admin_username        | `str` | admin                       | The motionEye admin username        |
-| admin_password        | `str` | ""                          | The motionEye admin password        |
-| surveillance_username | `str` | user                        | The motionEye surveillance username |
-| surveillance_password | `str` | ""                          | The motionEye surveillance password |
+| Argument              | Type                    | Default                     | Description                         |
+| --------------------- | ----------------------- | --------------------------- | ----------------------------------- |
+| url                   | `str`                   | URL of the motionEye server |
+| admin_username        | `str`                   | admin                       | The motionEye admin username        |
+| admin_password        | `str`                   | ""                          | The motionEye admin password        |
+| surveillance_username | `str`                   | user                        | The motionEye surveillance username |
+| surveillance_password | `str`                   | ""                          | The motionEye surveillance password |
+| session               | `aiohttp.ClientSession` | None                        | Optional aiohttp session to use     |
 
 This client needs both `admin` and `surveillance` passwords in order to interact with
 the API (which generally require the `admin` user), as well as prepare the URLs for
