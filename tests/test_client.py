@@ -436,3 +436,12 @@ async def test_is_file_type_movie() -> None:
     assert not client.is_file_type_movie(7)
     assert client.is_file_type_movie(8)
     assert client.is_file_type_movie(100)
+
+
+async def test_session_passed_in_is_not_closed() -> None:
+    """Test a session passed in is not closed."""
+
+    session = Mock()
+    client = MotionEyeClient("http://localhost", session=session)
+    await client.async_client_close()
+    assert not session.close.called

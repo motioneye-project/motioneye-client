@@ -69,7 +69,12 @@ class MotionEyeClient:
             )
 
         self._url = url
-        self._session = session or aiohttp.ClientSession()
+        if session:
+            self._session = session
+            self._created_session = False
+        else:
+            self._session = aiohttp.ClientSession()
+            self._created_session = True
         self._admin_username = admin_username or DEFAULT_ADMIN_USERNAME
         self._admin_password = admin_password or ""
         self._surveillance_username = (
@@ -181,8 +186,9 @@ class MotionEyeClient:
         return await self._async_request("/login")
 
     async def async_client_close(self) -> bool:
-        """Disconnect to the MotionEye server."""
-        await self._session.close()
+        """Disconnect from the MotionEye server."""
+        if self._created_session:
+            await self._session.close()
         return True
 
     async def async_get_manifest(self) -> dict[str, Any] | None:
