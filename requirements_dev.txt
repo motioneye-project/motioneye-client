@@ -26,4 +26,4 @@ requests==2.25.1; python_version >= "2.7" and python_full_version < "3.0.0" or p
 toml==0.10.2; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.6"
 typing-extensions==3.10.0.0; python_version >= "3.6"
 urllib3==1.26.4; python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version < "4"
-yarl==1.6.3; python_version >= "3.6"
+yarl==1.7.0; python_version >= "3.6"
