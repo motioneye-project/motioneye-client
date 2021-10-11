@@ -28,7 +28,7 @@ pytest = "^6.2"
 pytest-cov = "^2.11.1"
 pytest-aiohttp = "^0.3.0"
 codecov = "^2.1.11"
-pytest-timeout = "^1.4.2"
+pytest-timeout = "^2.0.0"
 pytest-xdist = "^2.2.1"
 
 [build-system]
