@@ -283,7 +283,8 @@ class MotionEyeClient:
             urljoin(
                 self._url,
                 f"/movie/{camera_id}/{action}/{self._strip_leading_slash(path)}",
-            )
+            ),
+            admin=False,
         )
 
     def get_image_url(self, camera_id: int, path: str, preview: bool = False) -> str:
@@ -293,7 +294,8 @@ class MotionEyeClient:
             urljoin(
                 self._url,
                 f"/picture/{camera_id}/{action}/{self._strip_leading_slash(path)}",
-            )
+            ),
+            admin=False,
         )
 
     @classmethod
