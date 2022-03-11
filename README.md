@@ -177,10 +177,10 @@ async def query_motioneye_server():
         return
 
       manifest = await client.async_get_manifest()
-      print ("Manifest: %s" % manifest)
+      print(f"Manifest: {manifest}")
 
       camera_list = await client.async_get_cameras()
-      print ("Cameras: %s" % camera_list)
+      print(f"Cameras: {camera_list}")
 
 asyncio.get_event_loop().run_until_complete(query_motioneye_server())
 ```
