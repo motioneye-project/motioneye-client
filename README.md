@@ -199,3 +199,18 @@ Testing:
 ```bash
 $ poetry run pytest
 ```
+
+## Updating Dependencies
+
+Updating dependencies:
+
+```bash
+$ poetry update
+```
+
+Exporting to `requirements.txt` and `requirements_dev.txt`:
+
+```bash
+$ poetry export --without-hashes -o requirements.txt
+$ poetry export --without-hashes --dev -o requirements_dev.txt
+```
