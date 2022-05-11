@@ -16,7 +16,7 @@ multidict==6.0.2; python_version >= "3.7"
 packaging==21.3; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.6"
 pluggy==1.0.0; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.6"
 py==1.11.0; python_version >= "3.6" and python_full_version < "3.0.0" or python_full_version >= "3.5.0" and python_version >= "3.6"
-pyparsing==3.0.7; python_version >= "3.6"
+pyparsing==3.0.9; python_version >= "3.6"
 pytest-aiohttp==0.3.0
 pytest-cov==2.12.1; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.5.0")
 pytest-forked==1.4.0; python_version >= "3.6"
