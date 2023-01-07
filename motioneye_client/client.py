@@ -10,7 +10,7 @@ from types import TracebackType
 from typing import Any
 from urllib.parse import urlencode, urljoin, urlsplit, urlunsplit
 
-import aiohttp  # type: ignore
+import aiohttp
 
 from . import utils
 from .const import (
@@ -172,7 +172,7 @@ class MotionEyeClient:
                     )
                     return return_value
                 except (json.decoder.JSONDecodeError, UnicodeDecodeError) as exc:
-                    _LOGGER.error(f"Could not JSON decode: {await response.read()}")
+                    _LOGGER.error(f"Could not JSON decode: {await response.read()!r}")
                     raise MotionEyeClientRequestError(response) from exc
         except aiohttp.client_exceptions.ClientConnectorError as exc:
             _LOGGER.warning(f"Connection failed to motionEye: {exc}")

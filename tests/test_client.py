@@ -6,10 +6,10 @@ from contextlib import closing
 import logging
 import socket
 from typing import Any
-from unittest.mock import Mock
+from unittest.mock import AsyncMock
 
-from aiohttp import web  # type: ignore
-import pytest  # type: ignore
+from aiohttp import web
+import pytest
 
 from motioneye_client.client import (
     MotionEyeClient,
@@ -31,11 +31,12 @@ async def _create_motioneye_server(aiohttp_server: Any, handlers: list[Any]) -> 
         if "/login" == route.path:
             break
     else:
-        login_handler = Mock(return_value=web.json_response({}))
+        login_handler = AsyncMock(return_value=web.json_response({}))
         app.add_routes([web.get("/login", login_handler)])
     return await aiohttp_server(app)
 
 
+@pytest.mark.asyncio
 async def test_signature(aiohttp_server: Any) -> None:
     """Test signature."""
 
@@ -57,6 +58,7 @@ async def test_signature(aiohttp_server: Any) -> None:
         assert client
 
 
+@pytest.mark.asyncio
 async def test_failed_request(caplog: Any, aiohttp_server: Any) -> None:
     """Test a non-JSON response."""
 
@@ -72,6 +74,7 @@ async def test_failed_request(caplog: Any, aiohttp_server: Any) -> None:
     assert "Unexpected HTTP response status" in caplog.text
 
 
+@pytest.mark.asyncio
 async def test_non_200_response(aiohttp_server: Any) -> None:
     """Test a non-200 response."""
 
@@ -86,6 +89,7 @@ async def test_non_200_response(aiohttp_server: Any) -> None:
         assert not client
 
 
+@pytest.mark.asyncio
 async def test_cannot_connect(caplog: Any, aiohttp_server: Any) -> None:
     """Test a failed connection."""
 
@@ -102,10 +106,11 @@ async def test_cannot_connect(caplog: Any, aiohttp_server: Any) -> None:
     assert "Connection failed" in caplog.text
 
 
+@pytest.mark.asyncio
 async def test_client_login_success(aiohttp_server: Any) -> None:
     """Test successful client login."""
 
-    login_handler = Mock(return_value=web.json_response({}))
+    login_handler = AsyncMock(return_value=web.json_response({}))
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/login", login_handler)]
@@ -115,10 +120,11 @@ async def test_client_login_success(aiohttp_server: Any) -> None:
         assert client
 
 
+@pytest.mark.asyncio
 async def test_client_login_failure(caplog: Any, aiohttp_server: Any) -> None:
     """Test failed client login."""
 
-    login_handler = Mock(
+    login_handler = AsyncMock(
         return_value=web.json_response(
             {"prompt": True, "error": "unauthorized"}, status=403
         )
@@ -133,11 +139,12 @@ async def test_client_login_failure(caplog: Any, aiohttp_server: Any) -> None:
     assert "Authentication failed" in caplog.text
 
 
+@pytest.mark.asyncio
 async def test_get_manifest(aiohttp_server: Any) -> None:
     """Test getting the motionEye manifest."""
 
     manifest = {"key": "value"}
-    manifest_handler = Mock(return_value=web.json_response(manifest))
+    manifest_handler = AsyncMock(return_value=web.json_response(manifest))
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/manifest.json", manifest_handler)]
@@ -148,11 +155,12 @@ async def test_get_manifest(aiohttp_server: Any) -> None:
         assert await client.async_get_manifest() == manifest
 
 
+@pytest.mark.asyncio
 async def test_get_server_config(aiohttp_server: Any) -> None:
     """Test getting the motionEye server config."""
 
     server_config = {"key": "value"}
-    server_config_handler = Mock(return_value=web.json_response(server_config))
+    server_config_handler = AsyncMock(return_value=web.json_response(server_config))
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/config/main/get", server_config_handler)]
@@ -163,11 +171,12 @@ async def test_get_server_config(aiohttp_server: Any) -> None:
         assert await client.async_get_server_config() == server_config
 
 
+@pytest.mark.asyncio
 async def test_get_cameras(aiohttp_server: Any) -> None:
     """Test getting the motionEye cameras."""
 
     cameras = {"key": "value"}
-    list_cameras_handler = Mock(return_value=web.json_response(cameras))
+    list_cameras_handler = AsyncMock(return_value=web.json_response(cameras))
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/config/list", list_cameras_handler)]
@@ -178,11 +187,12 @@ async def test_get_cameras(aiohttp_server: Any) -> None:
         assert await client.async_get_cameras() == cameras
 
 
+@pytest.mark.asyncio
 async def test_get_camera(aiohttp_server: Any) -> None:
     """Test getting a motionEye camera."""
 
     camera = {"key": "value"}
-    get_camera_handler = Mock(return_value=web.json_response(camera))
+    get_camera_handler = AsyncMock(return_value=web.json_response(camera))
 
     server = await _create_motioneye_server(
         aiohttp_server, [web.get("/config/100/get", get_camera_handler)]
@@ -192,6 +202,7 @@ async def test_get_camera(aiohttp_server: Any) -> None:
         assert await client.async_get_camera(100) == camera
 
 
+@pytest.mark.asyncio
 async def test_set_camera(aiohttp_server: Any) -> None:
     """Test setting a motionEye camera."""
 
@@ -210,6 +221,7 @@ async def test_set_camera(aiohttp_server: Any) -> None:
         assert await client.async_set_camera(100, config=camera) == {}
 
 
+@pytest.mark.asyncio
 async def test_is_camera_streaming() -> None:
     """Test whether a camera is streaming."""
     assert MotionEyeClient.is_camera_streaming(
@@ -224,6 +236,7 @@ async def test_is_camera_streaming() -> None:
     assert not MotionEyeClient.is_camera_streaming({})
 
 
+@pytest.mark.asyncio
 async def test_get_camera_stream_url(aiohttp_server: Any) -> None:
     """Test retrieving the stream URL."""
     client = MotionEyeClient("http://host:8000")
@@ -237,6 +250,7 @@ async def test_get_camera_stream_url(aiohttp_server: Any) -> None:
     assert not client.get_camera_stream_url({})
 
 
+@pytest.mark.asyncio
 async def test_get_camera_snapshot_url(aiohttp_server: Any) -> None:
     """Test retrieving the snapshot URL."""
     client = MotionEyeClient("http://host:8000")
@@ -252,6 +266,7 @@ async def test_get_camera_snapshot_url(aiohttp_server: Any) -> None:
     )
 
 
+@pytest.mark.asyncio
 async def test_action(aiohttp_server: Any) -> None:
     """Test performing an action on a motionEye camera."""
 
@@ -269,6 +284,7 @@ async def test_action(aiohttp_server: Any) -> None:
         assert await client.async_action(100, action) == {}
 
 
+@pytest.mark.asyncio
 async def test_invalid_urls(aiohttp_server: Any) -> None:
     """Test invalid URLs."""
     server = await _create_motioneye_server(aiohttp_server, [])
@@ -282,6 +298,7 @@ async def test_invalid_urls(aiohttp_server: Any) -> None:
             pass
 
 
+@pytest.mark.asyncio
 async def test_get_movie_url(aiohttp_server: Any) -> None:
     """Test retrieving a movie URL."""
     client = MotionEyeClient("http://host:8000")
@@ -299,6 +316,7 @@ async def test_get_movie_url(aiohttp_server: Any) -> None:
         client.get_movie_url(1, "")
 
 
+@pytest.mark.asyncio
 async def test_get_image_url(aiohttp_server: Any) -> None:
     """Test retrieving an image URL."""
     client = MotionEyeClient("http://host:8000")
@@ -316,6 +334,7 @@ async def test_get_image_url(aiohttp_server: Any) -> None:
         client.get_image_url(1, "")
 
 
+@pytest.mark.asyncio
 async def test_async_get_movies(aiohttp_server: Any) -> None:
     """Test getting motionEye movies."""
 
@@ -340,6 +359,7 @@ async def test_async_get_movies(aiohttp_server: Any) -> None:
         assert await client.async_get_movies(101, prefix="moo") == {"three": "four"}
 
 
+@pytest.mark.asyncio
 async def test_async_get_images(aiohttp_server: Any) -> None:
     """Test getting motionEye images."""
 
@@ -364,6 +384,7 @@ async def test_async_get_images(aiohttp_server: Any) -> None:
         assert await client.async_get_images(101, prefix="moo") == {"three": "four"}
 
 
+@pytest.mark.asyncio
 async def test_client_response_error(aiohttp_server: Any) -> None:
     """Test invalid server."""
 
@@ -386,11 +407,12 @@ async def test_client_response_error(aiohttp_server: Any) -> None:
         await client.async_client_close()
 
 
+@pytest.mark.asyncio
 async def test_unicode_decode_error(aiohttp_server: Any) -> None:
     """Test unicode bytes that cannot be decoded."""
 
     app = web.Application()
-    login_handler = Mock(
+    login_handler = AsyncMock(
         return_value=web.Response(
             body=b"\xff", charset="UTF-8", content_type="application/octet-stream"
         )
@@ -404,11 +426,12 @@ async def test_unicode_decode_error(aiohttp_server: Any) -> None:
     await client.async_client_close()
 
 
+@pytest.mark.asyncio
 async def test_json_decode_error(aiohttp_server: Any) -> None:
     """Test JSON that cannot be decoded."""
 
     app = web.Application()
-    login_handler = Mock(return_value=web.Response(body="this is not valid json"))
+    login_handler = AsyncMock(return_value=web.Response(body="this is not valid json"))
     app.add_routes([web.get("/login", login_handler)])
     server = await aiohttp_server(app)
 
@@ -418,6 +441,7 @@ async def test_json_decode_error(aiohttp_server: Any) -> None:
     await client.async_client_close()
 
 
+@pytest.mark.asyncio
 async def test_is_file_type_image() -> None:
     """Test is_file_type_image."""
 
@@ -428,6 +452,7 @@ async def test_is_file_type_image() -> None:
     assert not client.is_file_type_image(100)
 
 
+@pytest.mark.asyncio
 async def test_is_file_type_movie() -> None:
     """Test is_file_type_image."""
 
@@ -438,10 +463,11 @@ async def test_is_file_type_movie() -> None:
     assert client.is_file_type_movie(100)
 
 
+@pytest.mark.asyncio
 async def test_session_passed_in_is_not_closed() -> None:
     """Test a session passed in is not closed."""
 
-    session = Mock()
+    session = AsyncMock()
     client = MotionEyeClient("http://localhost", session=session)
     await client.async_client_close()
     assert not session.close.called
