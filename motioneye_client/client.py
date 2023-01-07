@@ -237,9 +237,11 @@ class MotionEyeClient:
     def get_camera_stream_url(self, camera: dict[str, Any]) -> str | None:
         """Get the camera stream URL."""
         if MotionEyeClient.is_camera_streaming(camera):
-            # Extract the hostname from the URL (removing the port if present)
-            # Url validity is checking on construction so this will always succeed.
-            host = urlsplit(self._url).netloc.split(":")[0]
+            # Remote motionEye instances will provide a host in their camera
+            # dictionary, use that if specified, otherwise extract the hostname
+            # from the URL (removing the port if present). Url validity is
+            # checked on construction so this will always succeed.
+            host = camera.get("host", urlsplit(self._url).netloc.split(":")[0])
 
             # motion (the process underlying motionEye) cannot natively do https on the
             # stream port, it will always be http regardless of what protocol is used to

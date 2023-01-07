@@ -17,7 +17,12 @@ from motioneye_client.client import (
     MotionEyeClientRequestError,
     MotionEyeClientURLParseError,
 )
-from motioneye_client.const import KEY_ID, KEY_STREAMING_PORT, KEY_VIDEO_STREAMING
+from motioneye_client.const import (
+    KEY_HOST,
+    KEY_ID,
+    KEY_STREAMING_PORT,
+    KEY_VIDEO_STREAMING,
+)
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -245,6 +250,20 @@ async def test_get_camera_stream_url(aiohttp_server: Any) -> None:
             {KEY_STREAMING_PORT: 8000, KEY_VIDEO_STREAMING: True}
         )
         == "http://host:8000/"
+    )
+
+    assert not client.get_camera_stream_url({})
+
+
+@pytest.mark.asyncio
+async def test_get_camera_stream_url_remote_motioneye(aiohttp_server: Any) -> None:
+    """Test retrieving the stream URL for a remote motioneye."""
+    client = MotionEyeClient("http://host:8000")
+    assert (
+        client.get_camera_stream_url(
+            {KEY_STREAMING_PORT: 8001, KEY_VIDEO_STREAMING: True, KEY_HOST: "foobar"}
+        )
+        == "http://foobar:8001/"
     )
 
     assert not client.get_camera_stream_url({})
