@@ -6,7 +6,7 @@
 
 [![PyPi](https://img.shields.io/pypi/v/motioneye-client.svg?style=flat-square)](https://pypi.org/project/motioneye-client/)
 [![PyPi](https://img.shields.io/pypi/pyversions/motioneye-client.svg?style=flat-square)](https://pypi.org/project/motioneye-client/)
-[![Build Status](https://img.shields.io/github/workflow/status/dermotduffy/motioneye-client/Build?style=flat-square)](https://github.com/dermotduffy/motioneye-client/actions/workflows/build.yaml)
+[![Build Status](https://img.shields.io/github/actions/workflow/status/dermotduffy/motioneye-client/build.yaml?branch=main)](https://github.com/dermotduffy/motioneye-client/actions/workflows/build.yaml)
 [![Test Coverage](https://img.shields.io/codecov/c/gh/dermotduffy/motioneye-client?style=flat-square)](https://codecov.io/gh/dermotduffy/motioneye-client)
 [![License](https://img.shields.io/github/license/dermotduffy/hass-motioneye.svg?style=flat-square)](LICENSE)
 [![BuyMeCoffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square)](https://www.buymeacoffee.com/dermotdu)
