@@ -1,4 +1,4 @@
-<img src="https://github.com/dermotduffy/hass-motioneye/blob/main/images/motioneye.png?raw=true"
+<img src="https://github.com/motioneye-project/motioneye-client/blob/main/images/motioneye.png?raw=true"
      alt="motionEye icon"
      width="15%"
      align="right"
@@ -9,7 +9,7 @@
 [![Build Status](https://img.shields.io/github/actions/workflow/status/motioneye-project/motioneye-client/build.yaml?branch=main)](https://github.com/motioneye-project/motioneye-client/actions/workflows/build.yaml)
 <!-- Code coverage is always 100% since tests fail otherwise. This avoids use of an external 3rd party data provider -->
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/motioneye-project/motioneye-client/actions/workflows/build.yaml)
-[![License](https://img.shields.io/github/license/dermotduffy/hass-motioneye.svg?style=flat-square)](LICENSE)
+[![License](https://img.shields.io/github/license/motioneye-project/motioneye-client.svg?style=flat-square)](LICENSE)
 [![BuyMeCoffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square)](https://www.buymeacoffee.com/dermotdu)
 
 # motionEye Client
@@ -216,4 +216,12 @@ Exporting to `requirements.txt` and `requirements_dev.txt`:
 ```bash
 $ poetry export --without-hashes -o requirements.txt
 $ poetry export --without-hashes --dev -o requirements_dev.txt
+```
+
+## Publishing
+
+Publish the package to the [Python Package Index](https://pypi.org/project/motioneye-client/).
+
+```bash
+$ poetry publish
 ```
