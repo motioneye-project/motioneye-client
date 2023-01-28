@@ -62,9 +62,3 @@ jobs:
       - name: Tests suite
         run: |
           pytest -p no:sugar
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v3.1.1
-        with:
-          env_vars: OS,PYTHON
-          fail_ci_if_error: true
-          verbose: true
