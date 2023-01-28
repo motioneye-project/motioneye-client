@@ -4,10 +4,11 @@
      align="right"
      style="float: right; margin: 10px 0px 20px 20px;" />
 
+<!-- Code coverage is always 100% since tests fail otherwise. Static badge avoids use of an external 3rd party data provider -->
+
 [![PyPi](https://img.shields.io/pypi/v/motioneye-client.svg?style=flat-square)](https://pypi.org/project/motioneye-client/)
 [![PyPi](https://img.shields.io/pypi/pyversions/motioneye-client.svg?style=flat-square)](https://pypi.org/project/motioneye-client/)
 [![Build Status](https://img.shields.io/github/actions/workflow/status/motioneye-project/motioneye-client/build.yaml?branch=main)](https://github.com/motioneye-project/motioneye-client/actions/workflows/build.yaml)
-<!-- Code coverage is always 100% since tests fail otherwise. This avoids use of an external 3rd party data provider -->
 [![Test Coverage](https://img.shields.io/badge/coverage-100%25-brightgreen)](https://github.com/motioneye-project/motioneye-client/actions/workflows/build.yaml)
 [![License](https://img.shields.io/github/license/motioneye-project/motioneye-client.svg?style=flat-square)](LICENSE)
 [![BuyMeCoffee](https://img.shields.io/badge/buy%20me%20a%20coffee-donate-yellow.svg?style=flat-square)](https://www.buymeacoffee.com/dermotdu)
