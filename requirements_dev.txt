@@ -36,5 +36,5 @@ requests==2.28.1; python_version >= "3.7" and python_version < "4" and (python_v
 tomli==2.0.1; python_version < "3.11" and python_version >= "3.7" and python_full_version <= "3.11.0a6" and (python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.7")
 typing-extensions==4.4.0; python_version >= "3.7"
 urllib3==1.26.13; python_version >= "3.7" and python_full_version < "3.0.0" and python_version < "4" and (python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0") or python_version >= "3.7" and python_version < "4" and (python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0") and python_full_version >= "3.6.0"
-virtualenv==20.18.0; python_version >= "3.7"
+virtualenv==20.21.0; python_version >= "3.7"
 yarl==1.8.2; python_version >= "3.7"
