@@ -33,7 +33,7 @@ pytest-xdist = "^3.1.0"
 pytest-timeout = "^2.1.0"
 pytest-aiohttp = "^1.0.4"
 pytest-codecov = "^0.5.1"
-pytest-asyncio = "^0.20.3"
+pytest-asyncio = "^0.24.0"
 mypy = "^0.991"
 
 [build-system]
