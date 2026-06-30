@@ -4,7 +4,7 @@ async-timeout==4.0.2; python_version >= "3.7"
 attrs==25.3.0; python_version >= "3.8"
 certifi==2026.6.17; python_version >= "3.7"
 cfgv==3.3.1; python_full_version >= "3.6.1" and python_version >= "3.7"
-charset-normalizer==2.1.1; python_full_version >= "3.6.0" and python_version >= "3.7" and python_version < "4" and (python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0")
+charset-normalizer==3.4.7; python_full_version >= "3.6.0" and python_version >= "3.7" and python_version < "4" and (python_version >= "2.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0")
 codecov==2.1.13; (python_version >= "2.7" and python_full_version < "3.0.0") or (python_full_version >= "3.4.0")
 colorama==0.4.6; python_version >= "3.7" and python_full_version < "3.0.0" and sys_platform == "win32" or sys_platform == "win32" and python_version >= "3.7" and python_full_version >= "3.7.0"
 coverage==7.0.4; python_version >= "3.7" and python_full_version < "3.0.0" or python_full_version >= "3.4.0" and python_version >= "3.7"
