@@ -5,8 +5,10 @@ description = "motionEye client library Python Package"
 authors = ["Dermot Duffy <dermot.duffy@gmail.com>"]
 classifiers = [
     "Intended Audience :: Developers",
+    "Programming Language :: Python :: 3",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
+    "Programming Language :: Python :: 3.10",
     "License :: OSI Approved :: MIT License",
     "Operating System :: OS Independent",
     "Topic :: Home Automation",
@@ -20,10 +22,10 @@ readme = "README.md"
 license = "MIT"
 
 [tool.poetry.dependencies]
-python = "^3.8"
+python = ">=3.8"
 aiohttp = "^3.10.11"
 
-[tool.poetry.dev-dependencies]
+[tool.poetry.group.dev.dependencies]
 pytest = "^8.3.5"
 codecov = "^2.1.13"
 pre-commit = "^3.5.0"
