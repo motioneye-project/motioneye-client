@@ -1,0 +1,49 @@
+---
+name: Build
+
+"on":
+  push:
+    branches:
+      - main
+  pull_request:
+  schedule:
+    - cron: "17 6 * * *"
+  workflow_dispatch:
+
+permissions: {contents: read}
+
+jobs:
+  pre-commit:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        # Python 3.14.1 breaks pyupgrade <3.21.1
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14.0"]
+    name: Pre-commit
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Setup Python ${{ matrix.python-version }} with dependencies
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          pip-install: -U pre-commit black flake8 reorder-python-imports
+
+      - run: pre-commit run --all-files --show-diff-on-failure --color=always
+
+  tests:
+    runs-on: ubuntu-24.04
+    strategy:
+      matrix:
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+    name: Run tests
+    steps:
+      - uses: actions/checkout@v7.0.0
+
+      - name: Setup Python ${{ matrix.python-version }} with dependencies
+        uses: actions/setup-python@v6
+        with:
+          python-version: ${{ matrix.python-version }}
+          pip-install: -Ur requirements_dev.txt
+
+      - run: pytest -p no:sugar

@@ -1,16 +1,19 @@
 ---
 name: Draft a release note
-on:
+
+"on":
   push:
     branches:
       - main
-      - master
+
+permissions: {contents: read}
+
 jobs:
   draft_release:
     name: Release Drafter
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Run release-drafter
         uses: release-drafter/release-drafter@v7.5.1
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ github.token }}

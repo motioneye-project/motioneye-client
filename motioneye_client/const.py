@@ -1,4 +1,5 @@
 """Constants for motionEye client."""
+
 DEFAULT_ADMIN_USERNAME = "admin"
 DEFAULT_PORT = 8765
 DEFAULT_URL_SCHEME = "http"
