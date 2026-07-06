@@ -1,15 +1,17 @@
+---
 name: Manage labels
 
-on:
+"on":
   push:
     branches:
       - main
-      - master
+
+permissions: {contents: read}
 
 jobs:
   labeler:
     name: Labeler
-    runs-on: ubuntu-latest
+    runs-on: ubuntu-24.04
     steps:
       - name: Check out the repository
         uses: actions/checkout@v7.0.0

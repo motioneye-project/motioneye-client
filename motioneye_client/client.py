@@ -82,7 +82,7 @@ class MotionEyeClient:
         )
         self._surveillance_password = surveillance_password or ""
 
-    async def __aenter__(self) -> "MotionEyeClient" | None:
+    async def __aenter__(self) -> MotionEyeClient | None:
         """Enter context manager and connect the client."""
         try:
             await self.async_client_login()

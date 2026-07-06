@@ -1,6 +1,7 @@
+---
 name: Build
 
-on:
+"on":
   push:
     branches:
       - main
@@ -9,14 +10,15 @@ on:
     - cron: "17 6 * * *"
   workflow_dispatch:
 
-permissions: { contents: read }
+permissions: {contents: read}
 
 jobs:
   pre-commit:
-    runs-on: "ubuntu-24.04"
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
-        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
+        # Python 3.14.1 breaks pyupgrade <3.21.1
+        python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14.0"]
     name: Pre-commit
     steps:
       - uses: actions/checkout@v7.0.0
@@ -30,7 +32,7 @@ jobs:
       - run: pre-commit run --all-files --show-diff-on-failure --color=always
 
   tests:
-    runs-on: "ubuntu-24.04"
+    runs-on: ubuntu-24.04
     strategy:
       matrix:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
