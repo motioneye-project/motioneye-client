@@ -4,7 +4,6 @@ from __future__ import annotations
 
 import asyncio
 from contextlib import closing
-import logging
 import socket
 from typing import Any
 from unittest.mock import AsyncMock
@@ -24,8 +23,6 @@ from motioneye_client.const import (
     KEY_STREAMING_PORT,
     KEY_VIDEO_STREAMING,
 )
-
-_LOGGER = logging.getLogger(__name__)
 
 
 async def _create_motioneye_server(aiohttp_server: Any, handlers: list[Any]) -> Any:
@@ -98,9 +95,6 @@ async def test_non_200_response(aiohttp_server: Any) -> None:
 @pytest.mark.asyncio
 async def test_cannot_connect(caplog: Any, aiohttp_server: Any) -> None:
     """Test a failed connection."""
-
-    async def login_handler(request: web.Request) -> web.Response:
-        return web.Response(body="this is not json")
 
     with closing(socket.socket(socket.AF_INET, socket.SOCK_STREAM)) as s:
         s.bind(("localhost", 0))
