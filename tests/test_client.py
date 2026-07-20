@@ -468,7 +468,7 @@ async def test_is_file_type_image() -> None:
 
 @pytest.mark.asyncio
 async def test_is_file_type_movie() -> None:
-    """Test is_file_type_image."""
+    """Test is_file_type_movie."""
 
     client = MotionEyeClient("http://localhost")
     assert not client.is_file_type_movie(0)
