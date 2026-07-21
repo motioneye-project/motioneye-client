@@ -21,7 +21,7 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14.0"]
     name: Pre-commit
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
 
       - name: Setup Python ${{ matrix.python-version }} with dependencies
         uses: actions/setup-python@v6
@@ -38,7 +38,7 @@ jobs:
         python-version: ["3.8", "3.9", "3.10", "3.11", "3.12", "3.13", "3.14"]
     name: Run tests
     steps:
-      - uses: actions/checkout@v7.0.0
+      - uses: actions/checkout@v7.0.1
 
       - name: Setup Python ${{ matrix.python-version }} with dependencies
         uses: actions/setup-python@v6
