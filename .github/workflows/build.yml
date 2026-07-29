@@ -27,7 +27,8 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          pip-install: -U pre-commit black flake8 reorder-python-imports
+
+      - run: pip install -U pre-commit black flake8 reorder-python-imports
 
       - run: pre-commit run --all-files --show-diff-on-failure --color=always
 
@@ -44,6 +45,7 @@ jobs:
         uses: actions/setup-python@v6
         with:
           python-version: ${{ matrix.python-version }}
-          pip-install: -Ur requirements_dev.txt
+
+      - run: pip install -Ur requirements_dev.txt
 
       - run: pytest -p no:sugar
