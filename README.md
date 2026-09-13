@@ -36,11 +36,17 @@ data streaming (which require the `surveillance` user).
 
 ## Primary Client Methods
 
-All async calls start with `async_`, and return the JSON response from the server (if any).
+All async calls start with `async_`. Most return the JSON response from the server
+(if any), while methods retrieving snapshots or media return the response body as
+`bytes`.
 
 ### async_client_login
 
-Login to the motionEye server. Not actually necessary, but useful for verifying credentials.
+Login to the motionEye server. For motionEye 0.44 and later, this uses session-based
+authentication. For older motionEye versions, the client falls back to the legacy
+signed-request authentication mechanism. The client automatically re-authenticates
+once when a session-authenticated request receives an HTTP 403 response.
+
 ### async_client_close
 
 Close the client session. Always returns True.
@@ -84,6 +90,16 @@ gives a path prefix to list (does not recurse).
 
 Get a list of saved images for a given `camera_id`. Accepts a `prefix` argument that
 gives a path prefix to list (does not recurse).
+
+### async_get_camera_snapshot
+
+Get the current snapshot for a given `camera_id`. Returns the image data as `bytes`.
+
+### async_get_media
+
+Get a saved image or movie for a given `camera_id` and media path. Returns the media
+data as `bytes`. The `image` argument selects between saved images and movies, while
+the `preview` argument requests a preview where supported.
 
 ## Convenience Methods
 
