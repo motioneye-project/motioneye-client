@@ -36,11 +36,17 @@ data streaming (which require the `surveillance` user).
 
 ## Primary Client Methods
 
-All async calls start with `async_`, and return the JSON response from the server (if any).
+All async calls start with `async_`, and return the JSON response from the server (if any)
+in most cases. `async_get_camera_snapshot` and `async_get_media` are the only exceptions,
+which return actual media/bytes data.
 
 ### async_client_login
 
-Login to the motionEye server. Not actually necessary, but useful for verifying credentials.
+Login to the motionEye server. For motionEye servers before v0.44, this is not actually
+necessary, but useful for verifying credentials. For motionEye servers from v0.44 on, a
+`async_client_login` call is needed at least once. Follow up queries will make use of and
+in case renew the obtained session cookie automatically.
+
 ### async_client_close
 
 Close the client session. Always returns True.
@@ -84,6 +90,22 @@ gives a path prefix to list (does not recurse).
 
 Get a list of saved images for a given `camera_id`. Accepts a `prefix` argument that
 gives a path prefix to list (does not recurse).
+
+### async_get_camera_snapshot
+
+Fetch the current camera snapshot for the given `camera_id`. The result is the same as
+querying the URL returned by `get_camera_snapshot_url` (see below).
+
+### async_get_media
+
+Fetch a saved image or movie for the given `camera_id` and `path` as mandatory
+positional arguments. `path` needs to be the file path relative to the camera's data dir.
+Additionally requires the named boolean `image` argument, to fetch an image if `True`,
+else a movie. Accepts the optional boolean `preview` argument to fetch a preview image of
+the movie, if `True`, instead of the movie itself.
+
+The result is the same as querying the URL returned by `get_image_url` and `get_movie_url`
+respectively, when using the same `camera_id`, `path`, and in case `preview` argument.
 
 ## Convenience Methods
 
