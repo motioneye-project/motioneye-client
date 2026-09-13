@@ -20,7 +20,7 @@ classifiers = [
 keywords = [
     "motioneye",
 ]
-repository = "https://github.com/dermotduffy/motioneye-client"
+repository = "https://github.com/motioneye-project/motioneye-client"
 include = ["motioneye_client/py.typed", "LICENSE"]
 readme = "README.md"
 license = "MIT"
