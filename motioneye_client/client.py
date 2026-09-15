@@ -192,7 +192,7 @@ class MotionEyeClient:
                     _LOGGER.warning(f"Authentication failed in request to {url}")
                     raise MotionEyeClientInvalidAuthError(response)
 
-                if not response.ok and response.status != 416:
+                if not response.ok:
                     _LOGGER.warning(
                         f"Unexpected HTTP response status code {response.status} for request: {url}"
                     )
@@ -557,7 +557,7 @@ class MotionEyeClient:
                 )
                 raise MotionEyeClientInvalidAuthError(response)
 
-            if not response.ok:
+            if not response.ok and response.status != 416:
                 response.release()
                 _LOGGER.warning(
                     f"Unexpected HTTP response status code {response.status} "
