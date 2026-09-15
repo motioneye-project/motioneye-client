@@ -594,6 +594,42 @@ async def test_session_saved_media(
 
 
 @pytest.mark.asyncio
+async def test_saved_media_stream_legacy_auth(aiohttp_server: Any) -> None:
+    """Test streaming saved media with legacy signature authentication."""
+
+    async def media_handler(request: web.Request) -> web.Response:
+        assert "_signature" in request.query
+        return web.Response(
+            body=b"streaming-media-data",
+            content_type="video/mp4",
+        )
+
+    server = await _create_motioneye_server(
+        aiohttp_server,
+        [
+            web.get("/movie/1/playback/test.mp4", media_handler),
+        ],
+    )
+
+    client = MotionEyeClient(
+        str(server.make_url("/")),
+        surveillance_username="user",
+        surveillance_password="password",
+    )
+
+    async with client.async_get_media_stream(
+        1,
+        "/test.mp4",
+        image=False,
+    ) as response:
+        assert response.status == 200
+        assert response.headers["Content-Type"] == "video/mp4"
+        assert await response.content.read() == b"streaming-media-data"
+
+    await client.async_client_close()
+
+
+@pytest.mark.asyncio
 async def test_session_saved_media_stream(aiohttp_server: Any) -> None:
     """Test streaming saved media with session authentication."""
 
