@@ -635,6 +635,56 @@ async def test_session_saved_media_stream(aiohttp_server: Any) -> None:
 
 
 @pytest.mark.asyncio
+async def test_session_saved_media_stream_range(aiohttp_server: Any) -> None:
+    """Test Range requests when streaming saved media."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        response = web.json_response({"user": "admin"})
+        response.set_cookie("user", "session-token")
+        return response
+
+    async def media_handler(request: web.Request) -> web.Response:
+        assert request.cookies.get("user") == "session-token"
+        assert request.headers["Range"] == "bytes=0-3"
+        return web.Response(
+            body=b"0123",
+            status=206,
+            headers={
+                "Content-Range": "bytes 0-3/10",
+                "Accept-Ranges": "bytes",
+                "Content-Type": "video/mp4",
+            },
+        )
+
+    server = await _create_motioneye_server(
+        aiohttp_server,
+        [
+            web.post("/login", login_handler),
+            web.get("/movie/1/playback/test.mp4", media_handler),
+        ],
+    )
+
+    client = MotionEyeClient(str(server.make_url("/")))
+    await client.async_client_login()
+
+    response = await client.async_get_media_stream(
+        1,
+        "/test.mp4",
+        image=False,
+        range_header="bytes=0-3",
+    )
+
+    assert response.status == 206
+    assert response.headers["Content-Range"] == "bytes 0-3/10"
+    assert response.headers["Accept-Ranges"] == "bytes"
+    assert response.headers["Content-Type"] == "video/mp4"
+    assert await response.content.read() == b"0123"
+
+    await response.close()
+    await client.async_client_close()
+
+
+@pytest.mark.asyncio
 async def test_session_saved_media_reauth(aiohttp_server: Any) -> None:
     """Test saved media reauthentication."""
     login_count = 0
