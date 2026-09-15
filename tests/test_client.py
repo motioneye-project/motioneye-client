@@ -787,6 +787,138 @@ async def test_session_saved_media_stream_range_reauth(
 
 
 @pytest.mark.asyncio
+async def test_session_saved_media_stream_forbidden(aiohttp_server: Any) -> None:
+    """Test streaming media authentication failure without reauthentication."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        response = web.json_response({"user": "admin"})
+        response.set_cookie("user", "session-token")
+        return response
+
+    async def media_handler(request: web.Request) -> web.Response:
+        return web.Response(status=403)
+
+    server = await _create_motioneye_server(
+        aiohttp_server,
+        [
+            web.post("/login", login_handler),
+            web.get("/movie/1/playback/test.mp4", media_handler),
+        ],
+    )
+
+    client = MotionEyeClient(str(server.make_url("/")))
+    await client.async_client_login()
+
+    with pytest.raises(MotionEyeClientInvalidAuthError):
+        async with client.async_get_media_stream(
+            1,
+            "/test.mp4",
+            image=False,
+            allow_reauth=False,
+        ):
+            pass
+
+    await client.async_client_close()
+
+
+@pytest.mark.asyncio
+async def test_session_saved_media_stream_bad_response(
+    aiohttp_server: Any,
+) -> None:
+    """Test an unexpected streaming media HTTP response."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        response = web.json_response({"user": "admin"})
+        response.set_cookie("user", "session-token")
+        return response
+
+    async def media_handler(request: web.Request) -> web.Response:
+        return web.Response(status=500)
+
+    server = await _create_motioneye_server(
+        aiohttp_server,
+        [
+            web.post("/login", login_handler),
+            web.get("/movie/1/playback/test.mp4", media_handler),
+        ],
+    )
+
+    client = MotionEyeClient(str(server.make_url("/")))
+    await client.async_client_login()
+
+    with pytest.raises(MotionEyeClientRequestError):
+        async with client.async_get_media_stream(
+            1,
+            "/test.mp4",
+            image=False,
+        ):
+            pass
+
+    await client.async_client_close()
+
+
+@pytest.mark.asyncio
+async def test_session_saved_media_stream_connection_error(
+    aiohttp_server: Any,
+) -> None:
+    """Test connection error while streaming saved media."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        response = web.json_response({"user": "admin"})
+        response.set_cookie("user", "session-token")
+        return response
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.post("/login", login_handler)]
+    )
+
+    client = MotionEyeClient(str(server.make_url("/")))
+    await client.async_client_login()
+    await server.close()
+
+    with pytest.raises(MotionEyeClientConnectionError):
+        async with client.async_get_media_stream(
+            1,
+            "/test.mp4",
+            image=False,
+        ):
+            pass
+
+    await client.async_client_close()
+
+
+@pytest.mark.asyncio
+async def test_session_saved_media_stream_client_error(
+    aiohttp_server: Any,
+) -> None:
+    """Test aiohttp client error while streaming saved media."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        response = web.json_response({"user": "admin"})
+        response.set_cookie("user", "session-token")
+        return response
+
+    server = await _create_motioneye_server(
+        aiohttp_server, [web.post("/login", login_handler)]
+    )
+
+    async with aiohttp.ClientSession() as session:
+        client = MotionEyeClient(str(server.make_url("/")), session=session)
+        await client.async_client_login()
+        session.get = Mock(  # type: ignore[method-assign]
+            side_effect=aiohttp.ClientError("request failed")
+        )
+
+        with pytest.raises(MotionEyeClientRequestError):
+            async with client.async_get_media_stream(
+                1,
+                "/test.mp4",
+                image=False,
+            ):
+                pass
+
+
+@pytest.mark.asyncio
 async def test_session_saved_media_reauth(aiohttp_server: Any) -> None:
     """Test saved media reauthentication."""
     login_count = 0
