@@ -13,6 +13,7 @@ from typing import Any
 from urllib.parse import urlencode, urljoin, urlsplit, urlunsplit
 
 import aiohttp
+from multidict import CIMultiDictProxy
 
 from . import utils
 from .const import (
@@ -59,9 +60,9 @@ class MotionEyeClientMediaResponse:
         self.response = response
 
     @property
-    def status(self) -> int:
-        """Return the HTTP status code."""
-        return self.response.status
+    def headers(self) -> CIMultiDictProxy[str]:
+        """Return the HTTP response headers."""
+        return self.response.headers
 
     @property
     def headers(self) -> aiohttp.typedefs.LooseHeaders:
@@ -528,9 +529,7 @@ class MotionEyeClient:
                 url = self._build_session_url(request_path)
                 headers = self._session_headers()
             else:
-                url = self._build_url(
-                    urljoin(self._url, request_path), admin=False
-                )
+                url = self._build_url(urljoin(self._url, request_path), admin=False)
                 headers = {}
 
             if range_header is not None:
