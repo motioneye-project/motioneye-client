@@ -506,6 +506,74 @@ class MotionEyeClient:
             _LOGGER.warning(f"Request failed to motionEye: {exc}")
             raise MotionEyeClientRequestError(exc) from exc
 
+    async def async_get_media_stream(
+        self,
+        camera_id: int,
+        path: str,
+        *,
+        image: bool,
+        preview: bool = False,
+        range_header: str | None = None,
+        allow_reauth: bool = True,
+    ) -> MotionEyeClientMediaResponse:
+        """Open saved media as a streaming response."""
+        media_type = "picture" if image else "movie"
+        action = "preview" if preview else ("download" if image else "playback")
+        request_path = (
+            f"/{media_type}/{camera_id}/{action}/{self._strip_leading_slash(path)}"
+        )
+
+        if self._auth_mode == "session":
+            url = self._build_session_url(request_path)
+            headers = self._session_headers()
+        else:
+            url = self._build_url(urljoin(self._url, request_path), admin=False)
+            headers = {}
+
+        if range_header is not None:
+            headers["Range"] = range_header
+
+        try:
+            response = await self._session.get(url, headers=headers)
+            _LOGGER.debug(f"GET {url} -> {response.status}")
+
+            if response.status == 403:
+                response.release()
+
+                if self._auth_mode == "session" and allow_reauth:
+                    _LOGGER.debug("motionEye session expired; logging in again")
+                    await self._async_session_login()
+                    return await self.async_get_media_stream(
+                        camera_id,
+                        path,
+                        image=image,
+                        preview=preview,
+                        range_header=range_header,
+                        allow_reauth=False,
+                    )
+
+                _LOGGER.warning(
+                    f"Authentication failed in request to {url} : {response}"
+                )
+                raise MotionEyeClientInvalidAuthError(response)
+
+            if not response.ok:
+                response.release()
+                _LOGGER.warning(
+                    f"Unexpected HTTP response status code {response.status} "
+                    f"for request: {url}"
+                )
+                raise MotionEyeClientRequestError(response)
+
+            return MotionEyeClientMediaResponse(response)
+
+        except aiohttp.client_exceptions.ClientConnectorError as exc:
+            _LOGGER.warning(f"Connection failed to motionEye: {exc}")
+            raise MotionEyeClientConnectionError(exc) from exc
+        except aiohttp.client_exceptions.ClientError as exc:
+            _LOGGER.warning(f"Request failed to motionEye: {exc}")
+            raise MotionEyeClientRequestError(exc) from exc
+    
     def get_movie_url(self, camera_id: int, path: str, preview: bool = False) -> str:
         """Get the movie playback URL."""
         action = "preview" if preview else "playback"
