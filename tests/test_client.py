@@ -620,17 +620,15 @@ async def test_session_saved_media_stream(aiohttp_server: Any) -> None:
     client = MotionEyeClient(str(server.make_url("/")))
     await client.async_client_login()
 
-    response = await client.async_get_media_stream(
+    async with client.async_get_media_stream(
         1,
         "/test.mp4",
         image=False,
-    )
+    ) as response:
+        assert response.status == 200
+        assert response.headers["Content-Type"] == "video/mp4"
+        assert await response.content.read() == b"streaming-media-data"
 
-    assert response.status == 200
-    assert response.headers["Content-Type"] == "video/mp4"
-    assert await response.content.read() == b"streaming-media-data"
-
-    await response.close()
     await client.async_client_close()
 
 
@@ -667,20 +665,18 @@ async def test_session_saved_media_stream_range(aiohttp_server: Any) -> None:
     client = MotionEyeClient(str(server.make_url("/")))
     await client.async_client_login()
 
-    response = await client.async_get_media_stream(
+    async with client.async_get_media_stream(
         1,
         "/test.mp4",
         image=False,
         range_header="bytes=0-3",
-    )
+    ) as response:
+        assert response.status == 206
+        assert response.headers["Content-Range"] == "bytes 0-3/10"
+        assert response.headers["Accept-Ranges"] == "bytes"
+        assert response.headers["Content-Type"] == "video/mp4"
+        assert await response.content.read() == b"0123"
 
-    assert response.status == 206
-    assert response.headers["Content-Range"] == "bytes 0-3/10"
-    assert response.headers["Accept-Ranges"] == "bytes"
-    assert response.headers["Content-Type"] == "video/mp4"
-    assert await response.content.read() == b"0123"
-
-    await response.close()
     await client.async_client_close()
 
 
@@ -716,18 +712,16 @@ async def test_session_saved_media_stream_range_not_satisfiable(
     client = MotionEyeClient(str(server.make_url("/")))
     await client.async_client_login()
 
-    response = await client.async_get_media_stream(
+    async with client.async_get_media_stream(
         1,
         "/test.mp4",
         image=False,
         range_header="bytes=100-200",
-    )
+    ) as response:
+        assert response.status == 416
+        assert response.headers["Content-Range"] == "bytes */10"
+        assert response.headers["Accept-Ranges"] == "bytes"
 
-    assert response.status == 416
-    assert response.headers["Content-Range"] == "bytes */10"
-    assert response.headers["Accept-Ranges"] == "bytes"
-
-    await response.close()
     await client.async_client_close()
 
 
@@ -777,20 +771,18 @@ async def test_session_saved_media_stream_range_reauth(
     client = MotionEyeClient(str(server.make_url("/")))
     await client.async_client_login()
 
-    response = await client.async_get_media_stream(
+    async with client.async_get_media_stream(
         1,
         "/test.mp4",
         image=False,
         range_header="bytes=4-7",
-    )
+    ) as response:
+        assert response.status == 206
+        assert response.headers["Content-Range"] == "bytes 4-7/10"
+        assert await response.content.read() == b"4567"
+        assert login_count == 2
+        assert request_count == 2
 
-    assert response.status == 206
-    assert response.headers["Content-Range"] == "bytes 4-7/10"
-    assert await response.content.read() == b"4567"
-    assert login_count == 2
-    assert request_count == 2
-
-    await response.close()
     await client.async_client_close()
 
 
