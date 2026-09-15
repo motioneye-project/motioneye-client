@@ -107,6 +107,41 @@ the movie, if `True`, instead of the movie itself.
 The result is the same as querying the URL returned by `get_image_url` and `get_movie_url`
 respectively, when using the same `camera_id`, `path`, and in case `preview` argument.
 
+### async_get_media_stream
+
+Open a saved image or movie for the given `camera_id` and `path` as a streaming
+response, without buffering the complete media file in memory. The arguments are the
+same as for `async_get_media`, with an additional optional `range_header` argument to
+forward an HTTP Range request.
+
+The method is an async context manager and returns a `MotionEyeClientMediaResponse`
+which exposes the upstream HTTP `status`, `headers`, and `content` as an
+`aiohttp.StreamReader`. The response remains open while inside the context manager and
+is closed automatically when leaving it.
+
+HTTP 206 Partial Content and 416 Range Not Satisfiable responses are preserved. When
+session reauthentication is required while opening the request, the original Range
+header is preserved when the request is retried.
+
+Example:
+
+```python
+async with client.async_get_media_stream(
+    camera_id,
+    path,
+    image=False,
+    range_header="bytes=0-1048575",
+) as response:
+    print(response.status)
+    print(response.headers)
+
+    async for chunk in response.content.iter_chunked(64 * 1024):
+        ...
+```
+
+This method does not automatically resume an already active stream if the connection is
+interrupted after content transfer has started.
+
 ## Convenience Methods
 
 ### is_camera_streaming
