@@ -49,6 +49,33 @@ class MotionEyeClientPathError(MotionEyeClientError):
     """Invalid path provided."""
 
 
+class MotionEyeClientMediaResponse:
+    """Streaming media response from motionEye."""
+
+    def __init__(self, response: aiohttp.ClientResponse) -> None:
+        """Initialize a streaming media response."""
+        self.response = response
+
+    @property
+    def status(self) -> int:
+        """Return the HTTP status code."""
+        return self.response.status
+
+    @property
+    def headers(self) -> aiohttp.typedefs.LooseHeaders:
+        """Return the HTTP response headers."""
+        return self.response.headers
+
+    @property
+    def content(self) -> aiohttp.StreamReader:
+        """Return the streaming response body."""
+        return self.response.content
+
+    async def close(self) -> None:
+        """Release the underlying response."""
+        self.response.release()
+
+
 class MotionEyeClient:
     """MotionEye Client."""
 
