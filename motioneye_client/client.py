@@ -73,6 +73,8 @@ class MotionEyeClientMediaResponse:
     def content(self) -> aiohttp.StreamReader:
         """Return the streaming response body."""
         return self.response.content
+
+
 class MotionEyeClient:
     """MotionEye Client."""
 
