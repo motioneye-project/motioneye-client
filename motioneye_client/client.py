@@ -573,7 +573,7 @@ class MotionEyeClient:
         except aiohttp.client_exceptions.ClientError as exc:
             _LOGGER.warning(f"Request failed to motionEye: {exc}")
             raise MotionEyeClientRequestError(exc) from exc
-    
+
     def get_movie_url(self, camera_id: int, path: str, preview: bool = False) -> str:
         """Get the movie playback URL."""
         action = "preview" if preview else "playback"
