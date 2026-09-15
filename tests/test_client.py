@@ -594,6 +594,47 @@ async def test_session_saved_media(
 
 
 @pytest.mark.asyncio
+async def test_session_saved_media_stream(aiohttp_server: Any) -> None:
+    """Test streaming saved media with session authentication."""
+
+    async def login_handler(request: web.Request) -> web.Response:
+        response = web.json_response({"user": "admin"})
+        response.set_cookie("user", "session-token")
+        return response
+
+    async def media_handler(request: web.Request) -> web.Response:
+        assert request.cookies.get("user") == "session-token"
+        return web.Response(
+            body=b"streaming-media-data",
+            content_type="video/mp4",
+        )
+
+    server = await _create_motioneye_server(
+        aiohttp_server,
+        [
+            web.post("/login", login_handler),
+            web.get("/movie/1/playback/test.mp4", media_handler),
+        ],
+    )
+
+    client = MotionEyeClient(str(server.make_url("/")))
+    await client.async_client_login()
+
+    response = await client.async_get_media_stream(
+        1,
+        "/test.mp4",
+        image=False,
+    )
+
+    assert response.status == 200
+    assert response.headers["Content-Type"] == "video/mp4"
+    assert await response.content.read() == b"streaming-media-data"
+
+    await response.close()
+    await client.async_client_close()
+
+
+@pytest.mark.asyncio
 async def test_session_saved_media_reauth(aiohttp_server: Any) -> None:
     """Test saved media reauthentication."""
     login_count = 0
