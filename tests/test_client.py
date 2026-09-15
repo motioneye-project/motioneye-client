@@ -732,6 +732,69 @@ async def test_session_saved_media_stream_range_not_satisfiable(
 
 
 @pytest.mark.asyncio
+async def test_session_saved_media_stream_range_reauth(
+    aiohttp_server: Any,
+) -> None:
+    """Test Range preservation when reauthenticating a media stream."""
+    login_count = 0
+    request_count = 0
+
+    async def login_handler(request: web.Request) -> web.Response:
+        nonlocal login_count
+        login_count += 1
+        response = web.json_response({"user": "admin"})
+        response.set_cookie("user", f"session-token-{login_count}")
+        return response
+
+    async def media_handler(request: web.Request) -> web.Response:
+        nonlocal request_count
+        request_count += 1
+
+        assert request.headers["Range"] == "bytes=4-7"
+
+        if request.cookies.get("user") == "session-token-1":
+            return web.Response(status=403)
+
+        assert request.cookies.get("user") == "session-token-2"
+        return web.Response(
+            body=b"4567",
+            status=206,
+            headers={
+                "Content-Range": "bytes 4-7/10",
+                "Accept-Ranges": "bytes",
+                "Content-Type": "video/mp4",
+            },
+        )
+
+    server = await _create_motioneye_server(
+        aiohttp_server,
+        [
+            web.post("/login", login_handler),
+            web.get("/movie/1/playback/test.mp4", media_handler),
+        ],
+    )
+
+    client = MotionEyeClient(str(server.make_url("/")))
+    await client.async_client_login()
+
+    response = await client.async_get_media_stream(
+        1,
+        "/test.mp4",
+        image=False,
+        range_header="bytes=4-7",
+    )
+
+    assert response.status == 206
+    assert response.headers["Content-Range"] == "bytes 4-7/10"
+    assert await response.content.read() == b"4567"
+    assert login_count == 2
+    assert request_count == 2
+
+    await response.close()
+    await client.async_client_close()
+
+
+@pytest.mark.asyncio
 async def test_session_saved_media_reauth(aiohttp_server: Any) -> None:
     """Test saved media reauthentication."""
     login_count = 0
