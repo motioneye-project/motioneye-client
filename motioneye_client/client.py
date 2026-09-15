@@ -60,12 +60,12 @@ class MotionEyeClientMediaResponse:
         self.response = response
 
     @property
-    def headers(self) -> CIMultiDictProxy[str]:
-        """Return the HTTP response headers."""
-        return self.response.headers
+    def status(self) -> int:
+        """Return the HTTP status code."""
+        return self.response.status
 
     @property
-    def headers(self) -> aiohttp.typedefs.LooseHeaders:
+    def headers(self) -> CIMultiDictProxy[str]:
         """Return the HTTP response headers."""
         return self.response.headers
 
@@ -73,8 +73,6 @@ class MotionEyeClientMediaResponse:
     def content(self) -> aiohttp.StreamReader:
         """Return the streaming response body."""
         return self.response.content
-
-
 class MotionEyeClient:
     """MotionEye Client."""
 
