@@ -167,6 +167,11 @@ class MotionEyeClient:
             headers["Cookie"] = f"user={self._session_cookie}"
         return headers
 
+    def _use_legacy_auth(self) -> None:
+        """Drop session state for servers without session login."""
+        self._session_cookie = None
+        self._auth_mode = "legacy"
+
     async def _async_session_login(self) -> dict[str, Any] | None:
         """Login using session authentication introduced in motionEye 0.44."""
         url = urljoin(self._url, "/login")
@@ -185,6 +190,7 @@ class MotionEyeClient:
                 # BaseHandler returns 400 for unsupported methods, while other
                 # deployments may return 404/405.
                 if response.status in (400, 404, 405):
+                    self._use_legacy_auth()
                     return None
 
                 if response.status in (401, 403):
@@ -207,6 +213,7 @@ class MotionEyeClient:
                             "Empty session login response without a cookie, "
                             "falling back to legacy authentication"
                         )
+                        self._use_legacy_auth()
                         return None
 
                     _LOGGER.warning(
