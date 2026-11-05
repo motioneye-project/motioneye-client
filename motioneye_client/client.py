@@ -199,6 +199,16 @@ class MotionEyeClient:
 
                 cookie = response.cookies.get("user")
                 if cookie is None:
+                    # motionEye releases before 0.44 (e.g. 0.42.1 on motionEyeOS,
+                    # 0.43.x) answer POST /login with an empty 200 response and no
+                    # session cookie. They only support signature auth.
+                    if not (await response.read()).strip():
+                        _LOGGER.debug(
+                            "Empty session login response without a cookie, "
+                            "falling back to legacy authentication"
+                        )
+                        return None
+
                     _LOGGER.warning(
                         "motionEye session login succeeded without a user cookie"
                     )
