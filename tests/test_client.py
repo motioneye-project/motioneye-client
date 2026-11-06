@@ -270,6 +270,96 @@ async def test_session_login_missing_cookie(caplog: Any, aiohttp_server: Any) ->
 
 
 @pytest.mark.asyncio
+async def test_session_login_empty_response_falls_back_to_legacy(
+    aiohttp_server: Any,
+) -> None:
+    """Test fallback to legacy auth for pre-0.44 servers.
+
+    motionEye 0.42.1 / 0.43.x answer POST /login with an empty 200 response and
+    no session cookie.
+    """
+
+    async def session_login_handler(request: web.Request) -> web.Response:
+        return web.Response(status=200, body=b"", content_type="text/html")
+
+    async def legacy_login_handler(request: web.Request) -> web.Response:
+        assert "_signature" in request.query
+        return web.json_response({})
+
+    async def config_handler(request: web.Request) -> web.Response:
+        assert "_signature" in request.query
+        assert "Cookie" not in request.headers
+        return web.json_response({"key": "value"})
+
+    server = await _create_motioneye_server(
+        aiohttp_server,
+        [
+            web.post("/login", session_login_handler),
+            web.get("/login", legacy_login_handler),
+            web.get("/config/main/get", config_handler),
+        ],
+    )
+
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_server_config() == {"key": "value"}
+
+
+@pytest.mark.asyncio
+async def test_session_reauth_empty_response_falls_back_to_legacy(
+    aiohttp_server: Any,
+) -> None:
+    """Test re-authentication switching an established session to legacy auth.
+
+    If the server stops supporting session login (e.g. downgraded below 0.44), the
+    stale cookie must not be reused.
+    """
+    login_count = 0
+
+    async def session_login_handler(request: web.Request) -> web.Response:
+        nonlocal login_count
+        login_count += 1
+        if login_count == 1:
+            response = web.json_response({})
+            response.set_cookie("user", "session-token")
+            return response
+        return web.Response(status=200, body=b"", content_type="text/html")
+
+    async def legacy_login_handler(request: web.Request) -> web.Response:
+        assert "_signature" in request.query
+        return web.json_response({})
+
+    request_count = 0
+
+    async def config_handler(request: web.Request) -> web.Response:
+        nonlocal request_count
+        request_count += 1
+        if request_count == 1:
+            assert request.headers["Cookie"] == "user=session-token"
+            return web.json_response({"error": "unauthorized"}, status=403)
+
+        assert "_signature" in request.query
+        assert "Cookie" not in request.headers
+        return web.json_response({"key": "value"})
+
+    server = await _create_motioneye_server(
+        aiohttp_server,
+        [
+            web.post("/login", session_login_handler),
+            web.get("/login", legacy_login_handler),
+            web.get("/config/main/get", config_handler),
+        ],
+    )
+
+    async with MotionEyeClient(str(server.make_url("/"))) as client:
+        assert client
+        assert await client.async_get_server_config() == {"key": "value"}
+
+    assert login_count == 2
+    assert request_count == 2
+
+
+@pytest.mark.asyncio
 async def test_session_login_bad_response(caplog: Any, aiohttp_server: Any) -> None:
     """Test an unexpected response to session login."""
 
